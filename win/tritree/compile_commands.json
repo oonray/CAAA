@@ -1,0 +1,66 @@
+[
+    {
+        "arguments": [
+            "gcc",
+            "-c",
+            "-g",
+            "-Wall",
+            "-Wextra",
+            "-O2",
+            "-Isrc",
+            "-fPIC",
+            "-I/usr/local/include",
+            "-I",
+            "/usr/include/SDL2",
+            "-o",
+            "src/tritree.o",
+            "src/tritree.c"
+        ],
+        "directory": "/mnt/f/git/CResearch/lib/lin/tritree",
+        "file": "src/tritree.c"
+    },
+    {
+        "arguments": [
+            "gcc",
+            "-c",
+            "-I",
+            "tests",
+            "-g",
+            "-Wall",
+            "-Wextra",
+            "-O2",
+            "-Isrc",
+            "-I/usr/local/include",
+            "-I",
+            "/usr/include/SDL2",
+            "build/libbintree.a",
+            "-o",
+            "tests/tritree_tests",
+            "tests/munit.c"
+        ],
+        "directory": "/mnt/f/git/CResearch/lib/lin/tritree",
+        "file": "tests/munit.c"
+    },
+    {
+        "arguments": [
+            "gcc",
+            "-c",
+            "-I",
+            "tests",
+            "-g",
+            "-Wall",
+            "-Wextra",
+            "-O2",
+            "-Isrc",
+            "-I/usr/local/include",
+            "-I",
+            "/usr/include/SDL2",
+            "build/libbintree.a",
+            "-o",
+            "tests/tritree_tests",
+            "tests/tritree_tests.c"
+        ],
+        "directory": "/mnt/f/git/CResearch/lib/lin/tritree",
+        "file": "tests/tritree_tests.c"
+    }
+]

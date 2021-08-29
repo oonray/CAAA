@@ -1,0 +1,30 @@
+[
+    {
+        "arguments": [
+            "cc",
+            "-c",
+            "-Isrc",
+            "src/map.o",
+            "src/bstrlib.o",
+            "-o",
+            "tests/map_test",
+            "tests/munit.c"
+        ],
+        "directory": "/mnt/c/Users/alexa/git/CResearch/lib/map",
+        "file": "tests/munit.c"
+    },
+    {
+        "arguments": [
+            "cc",
+            "-c",
+            "-Isrc",
+            "src/map.o",
+            "src/bstrlib.o",
+            "-o",
+            "tests/map_test",
+            "tests/map_tests.c"
+        ],
+        "directory": "/mnt/c/Users/alexa/git/CResearch/lib/map",
+        "file": "tests/map_tests.c"
+    }
+]

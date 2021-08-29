@@ -1,0 +1,86 @@
+[
+    {
+        "arguments": [
+            "gcc",
+            "-c",
+            "-g",
+            "-Wall",
+            "-Wextra",
+            "-O2",
+            "-Isrc",
+            "-fPIC",
+            "-I/usr/local/include",
+            "-I",
+            "/usr/include/SDL2",
+            "-o",
+            "src/bstrlib.o",
+            "src/bstrlib.c"
+        ],
+        "directory": "/mnt/f/git/CResearch/lib/C/lin/bintree",
+        "file": "src/bstrlib.c"
+    },
+    {
+        "arguments": [
+            "gcc",
+            "-c",
+            "-I",
+            "tests",
+            "-g",
+            "-Wall",
+            "-Wextra",
+            "-O2",
+            "-Isrc",
+            "-I/usr/local/include",
+            "-I",
+            "/usr/include/SDL2",
+            "build/libbintree.a",
+            "-o",
+            "tests/bintree_tests",
+            "tests/bintree_tests.c"
+        ],
+        "directory": "/mnt/f/git/CResearch/lib/C/lin/bintree",
+        "file": "tests/bintree_tests.c"
+    },
+    {
+        "arguments": [
+            "gcc",
+            "-c",
+            "-I",
+            "tests",
+            "-g",
+            "-Wall",
+            "-Wextra",
+            "-O2",
+            "-Isrc",
+            "-I/usr/local/include",
+            "-I",
+            "/usr/include/SDL2",
+            "build/libbintree.a",
+            "-o",
+            "tests/bintree_tests",
+            "tests/munit.c"
+        ],
+        "directory": "/mnt/f/git/CResearch/lib/C/lin/bintree",
+        "file": "tests/munit.c"
+    },
+    {
+        "arguments": [
+            "gcc",
+            "-c",
+            "-g",
+            "-Wall",
+            "-Wextra",
+            "-O2",
+            "-Isrc",
+            "-fPIC",
+            "-I/usr/local/include",
+            "-I",
+            "/usr/include/SDL2",
+            "-o",
+            "src/bintree.o",
+            "src/bintree.c"
+        ],
+        "directory": "/mnt/f/git/CResearch/lib/C/lin/bintree",
+        "file": "src/bintree.c"
+    }
+]

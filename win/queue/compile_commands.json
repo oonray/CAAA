@@ -1,0 +1,26 @@
+[
+    {
+        "arguments": [
+            "gcc",
+            "-c",
+            "-Isrc",
+            "-o",
+            "bin/queue_test",
+            "tests/queue_tests.c"
+        ],
+        "directory": "/mnt/c/Users/alexa/git/CResearch/lib/queue",
+        "file": "tests/queue_tests.c"
+    },
+    {
+        "arguments": [
+            "gcc",
+            "-c",
+            "-Isrc",
+            "-o",
+            "bin/queue_test",
+            "tests/munit.c"
+        ],
+        "directory": "/mnt/c/Users/alexa/git/CResearch/lib/queue",
+        "file": "tests/munit.c"
+    }
+]
