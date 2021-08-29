@@ -1,6 +1,6 @@
 #include "munit.h" 
-#include "c/dbg.h"
-#include "tritree.h"
+#include <dbg.h>
+#include <tritree.h>
 #include <bstrlib.h>
 
 typedef struct test_data{

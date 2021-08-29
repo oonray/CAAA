@@ -18,7 +18,7 @@ out->hints.ai_socktype = Type;
 out->hints.ai_protocol = Proto;
 
 out->socket = socket(out->hints.ai_family,out->hints.ai_socktype,out->hints.ai_protocol);
-check(socket!=INVALID_SOCKET,"Socket create error: %ld",WSAGetLastError());
+check(socket!=INVALID_SOCKET,"Socket create error: %ld", WSAGetLastError());
 #else
 out->addr.sin_family 	= Type;
 out->addr.sin_port 		= port;
