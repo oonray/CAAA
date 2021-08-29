@@ -1,4 +1,4 @@
-#include <c/vector.h>
+#include <vector.h>
 
 #ifndef __stack_h
 #define __stack_h

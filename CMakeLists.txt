@@ -1,8 +1,31 @@
 cmake_minimum_required(VERSION 3.10)
 project(CAAA VERSION 1.0)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 include_directories(BEFORE dbg)
+include_directories(BEFORE strings)
 include_directories(BEFORE vector/src)
+include_directories(BEFORE ringbuffer/src)
+
+#HFILES
+if (${UNIX})
+  set(DEST "include/c")
+else()
+  set(DEST "c")
+endif (${UNIX})
+
+FILE(GLOB bstr_h string/*.h)
+install(FILES stack/src/stack.h DESTINATION ${DEST})
+install(FILES queue/src/queue.h DESTINATION ${DEST})
+install(FILES map/src/map.h DESTINATION ${DEST})
+install(FILES vector/src/vector.h DESTINATION ${DEST})
+install(FILES ringbuffer/src/ringbuffer.h DESTINATION ${DEST})
+install(FILES tritree/src/tritree.h DESTINATION ${DEST})
+install(FILES ${bstr_h} DESTINATION ${DEST}"/bstr")
+install(FILES bintree/src/bintree.h DESTINATION ${DEST})
+install(FILES io/src/fileio.h DESTINATION ${DEST})
+
 
 #bstrlib
 #@author websnarf
@@ -48,24 +71,9 @@ add_library(bintree $<TARGET_OBJECTS:vector_obj> $<TARGET_OBJECTS:bintree_obj>)
 install(TARGETS bintree)
 
 #fileio
+#
+if (${UNIX})
 add_library(fileio_obj OBJECT io/src/fileio.c)
 add_library(fileio $<TARGET_OBJECTS:vector_obj> $<TARGET_OBJECTS:fileio_obj>)
 install(TARGETS fileio)
-
-if (${UNIX})
-  set(DEST "include/c")
-else()
-  set(DEST "c")
-endif (${UNIX})
-
-
-FILE(GLOB bstr_h string/*.h)
-install(FILES stack/src/stack.h DESTINATION ${DEST})
-install(FILES queue/src/queue.h DESTINATION ${DEST})
-install(FILES map/src/map.h DESTINATION ${DEST})
-install(FILES vector/src/vector.h DESTINATION ${DEST})
-install(FILES ringbuffer/src/ringbuffer.h DESTINATION ${DEST})
-install(FILES tritree/src/tritree.h DESTINATION ${DEST})
-install(FILES ${bstr_h} DESTINATION ${DEST}"/bstr")
-install(FILES bintree/src/bintree.h DESTINATION ${DEST})
-install(FILES io/src/fileio.h DESTINATION ${DEST})
+endif()

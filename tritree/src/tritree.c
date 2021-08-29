@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <c/dbg.h>
+#include <dbg.h>
 #include "tritree.h"
 
 static inline TriTree *TriTree_Insert_Base(TriTree *root,TriTree *node,const char *key,size_t len,void *value){

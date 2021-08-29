@@ -2,7 +2,7 @@
 #define _BinTree_h
 
 #include <stdlib.h>
-#include <c/dbg.h>
+#include <dbg.h>
 #include "bstrlib.h"
 
 

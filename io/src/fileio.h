@@ -10,9 +10,9 @@
 #include <fcntl.h>
 #include <stdbool.h>
 
-#include <c/dbg.h>
-#include <c/ringbuffer.h>
-#include <c/vector.h>
+#include <dbg.h>
+#include <ringbuffer.h>
+#include <vector.h>
 
 #include "bstrlib.h"
 
