@@ -53,6 +53,7 @@ add_library(map $<TARGET_OBJECTS:vector_obj> $<TARGET_OBJECTS:map_obj>)
 install(TARGETS map)
 
 add_executable(map_tests map/tests/map_tests.c map/tests/munit.c $<TARGET_OBJECTS:map>)
+target_include_directories(map_tests BEFORE PRIVATE map/src)
 target_link_libraries(map_tests PRIVATE map vector bstring)
 add_test(NAME map_test
          COMMAND map_tests)
@@ -63,6 +64,7 @@ add_library(stack $<TARGET_OBJECTS:vector> $<TARGET_OBJECTS:stack_obj>)
 install(TARGETS stack)
 
 add_executable(stack_tests stack/tests/stack_tests.c stack/tests/munit.c)
+target_include_directories(stack_tests BEFORE PRIVATE stack/src)
 target_link_libraries(stack_tests PRIVATE stack vector)
 add_test(NAME stack_test
          COMMAND stack_tests)
@@ -73,6 +75,7 @@ add_library(queue $<TARGET_OBJECTS:vector_obj> $<TARGET_OBJECTS:queue_obj>)
 install(TARGETS queue)
 
 add_executable(queue_tests queue/tests/queue_tests.c queue/tests/munit.c)
+target_include_directories(queue_tests BEFORE PRIVATE queue/src)
 target_link_libraries(queue_tests PRIVATE queue vector)
 add_test(NAME queue_test
          COMMAND queue_tests)
@@ -107,6 +110,7 @@ add_library(bintree $<TARGET_OBJECTS:vector_obj> $<TARGET_OBJECTS:bintree_obj>)
 install(TARGETS bintree)
 
 add_executable(bintree_tests bintree/tests/bintree_tests.c bintree/tests/munit.c)
+target_include_directories(bintree_tests BEFORE PRIVATE bintree/src)
 target_link_libraries(bintree_tests PRIVATE bintree vector bstring)
 add_test(NAME bintree_test
          COMMAND bintree_tests)
