@@ -26,6 +26,7 @@ install(FILES tritree/src/tritree.h DESTINATION ${DEST})
 install(FILES ${bstr_h} DESTINATION ${DEST}"/bstr")
 install(FILES bintree/src/bintree.h DESTINATION ${DEST})
 install(FILES io/src/fileio.h DESTINATION ${DEST})
+install(FILES argparse/src/argparse.h DESTINATION ${DEST})
 
 
 #bstrlib
@@ -121,3 +122,15 @@ add_library(fileio_obj OBJECT io/src/fileio.c)
 add_library(fileio $<TARGET_OBJECTS:vector_obj> $<TARGET_OBJECTS:fileio_obj>)
 install(TARGETS fileio)
 endif()
+
+#argparse
+add_library(argparse_obj OBJECT argparse/src/bstrlib.c argparse/src/argparse.c)
+add_library(argparse $<TARGET_OBJECTS:vector_obj> $<TARGET_OBJECTS:map_obj> $<TARGET_OBJECTS:argparse_obj>)
+install(TARGETS argparse)
+
+add_executable(argparse_tests argparse/tests/argparse_tests.c argparse/tests/munit.c)
+target_include_directories(argparse_tests BEFORE PRIVATE argparse/src)
+target_link_libraries(argparse_tests PRIVATE argparse)
+
+add_test(NAME argparse_test
+         COMMAND argparse_tests)

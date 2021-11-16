@@ -1,0 +1,157 @@
+[
+{
+  "directory": "/mnt/f/git/C/CAAA/build",
+  "command": "/usr/bin/cc  -I/mnt/f/git/C/CAAA/ringbuffer/src -I/mnt/f/git/C/CAAA/vector/src -I/mnt/f/git/C/CAAA/strings -I/mnt/f/git/C/CAAA/dbg    -o CMakeFiles/queue_obj.dir/queue/src/queue.c.o   -c /mnt/f/git/C/CAAA/queue/src/queue.c",
+  "file": "/mnt/f/git/C/CAAA/queue/src/queue.c"
+},
+{
+  "directory": "/mnt/f/git/C/CAAA/build",
+  "command": "/usr/bin/cc  -I/mnt/f/git/C/CAAA/ringbuffer/src -I/mnt/f/git/C/CAAA/vector/src -I/mnt/f/git/C/CAAA/strings -I/mnt/f/git/C/CAAA/dbg    -o CMakeFiles/stack_obj.dir/stack/src/stack.c.o   -c /mnt/f/git/C/CAAA/stack/src/stack.c",
+  "file": "/mnt/f/git/C/CAAA/stack/src/stack.c"
+},
+{
+  "directory": "/mnt/f/git/C/CAAA/build",
+  "command": "/usr/bin/cc  -I/mnt/f/git/C/CAAA/ringbuffer/src -I/mnt/f/git/C/CAAA/vector/src -I/mnt/f/git/C/CAAA/strings -I/mnt/f/git/C/CAAA/dbg    -o CMakeFiles/map_obj.dir/map/src/map.c.o   -c /mnt/f/git/C/CAAA/map/src/map.c",
+  "file": "/mnt/f/git/C/CAAA/map/src/map.c"
+},
+{
+  "directory": "/mnt/f/git/C/CAAA/build",
+  "command": "/usr/bin/cc  -I/mnt/f/git/C/CAAA/ringbuffer/src -I/mnt/f/git/C/CAAA/vector/src -I/mnt/f/git/C/CAAA/strings -I/mnt/f/git/C/CAAA/dbg    -o CMakeFiles/vector_tests.dir/vector/tests/vector_tests.c.o   -c /mnt/f/git/C/CAAA/vector/tests/vector_tests.c",
+  "file": "/mnt/f/git/C/CAAA/vector/tests/vector_tests.c"
+},
+{
+  "directory": "/mnt/f/git/C/CAAA/build",
+  "command": "/usr/bin/cc  -I/mnt/f/git/C/CAAA/ringbuffer/src -I/mnt/f/git/C/CAAA/vector/src -I/mnt/f/git/C/CAAA/strings -I/mnt/f/git/C/CAAA/dbg    -o CMakeFiles/vector_tests.dir/vector/tests/munit.c.o   -c /mnt/f/git/C/CAAA/vector/tests/munit.c",
+  "file": "/mnt/f/git/C/CAAA/vector/tests/munit.c"
+},
+{
+  "directory": "/mnt/f/git/C/CAAA/build",
+  "command": "/usr/bin/cc  -I/mnt/f/git/C/CAAA/ringbuffer/src -I/mnt/f/git/C/CAAA/vector/src -I/mnt/f/git/C/CAAA/strings -I/mnt/f/git/C/CAAA/dbg    -o CMakeFiles/bstring_obj.dir/strings/bsafe.c.o   -c /mnt/f/git/C/CAAA/strings/bsafe.c",
+  "file": "/mnt/f/git/C/CAAA/strings/bsafe.c"
+},
+{
+  "directory": "/mnt/f/git/C/CAAA/build",
+  "command": "/usr/bin/cc  -I/mnt/f/git/C/CAAA/ringbuffer/src -I/mnt/f/git/C/CAAA/vector/src -I/mnt/f/git/C/CAAA/strings -I/mnt/f/git/C/CAAA/dbg    -o CMakeFiles/bstring_obj.dir/strings/bstest.c.o   -c /mnt/f/git/C/CAAA/strings/bstest.c",
+  "file": "/mnt/f/git/C/CAAA/strings/bstest.c"
+},
+{
+  "directory": "/mnt/f/git/C/CAAA/build",
+  "command": "/usr/bin/cc  -I/mnt/f/git/C/CAAA/ringbuffer/src -I/mnt/f/git/C/CAAA/vector/src -I/mnt/f/git/C/CAAA/strings -I/mnt/f/git/C/CAAA/dbg    -o CMakeFiles/bstring_obj.dir/strings/bstraux.c.o   -c /mnt/f/git/C/CAAA/strings/bstraux.c",
+  "file": "/mnt/f/git/C/CAAA/strings/bstraux.c"
+},
+{
+  "directory": "/mnt/f/git/C/CAAA/build",
+  "command": "/usr/bin/cc  -I/mnt/f/git/C/CAAA/ringbuffer/src -I/mnt/f/git/C/CAAA/vector/src -I/mnt/f/git/C/CAAA/strings -I/mnt/f/git/C/CAAA/dbg    -o CMakeFiles/bstring_obj.dir/strings/bstrlib.c.o   -c /mnt/f/git/C/CAAA/strings/bstrlib.c",
+  "file": "/mnt/f/git/C/CAAA/strings/bstrlib.c"
+},
+{
+  "directory": "/mnt/f/git/C/CAAA/build",
+  "command": "/usr/bin/cc  -I/mnt/f/git/C/CAAA/ringbuffer/src -I/mnt/f/git/C/CAAA/vector/src -I/mnt/f/git/C/CAAA/strings -I/mnt/f/git/C/CAAA/dbg    -o CMakeFiles/bstring_obj.dir/strings/buniutil.c.o   -c /mnt/f/git/C/CAAA/strings/buniutil.c",
+  "file": "/mnt/f/git/C/CAAA/strings/buniutil.c"
+},
+{
+  "directory": "/mnt/f/git/C/CAAA/build",
+  "command": "/usr/bin/cc  -I/mnt/f/git/C/CAAA/ringbuffer/src -I/mnt/f/git/C/CAAA/vector/src -I/mnt/f/git/C/CAAA/strings -I/mnt/f/git/C/CAAA/dbg    -o CMakeFiles/bstring_obj.dir/strings/testaux.c.o   -c /mnt/f/git/C/CAAA/strings/testaux.c",
+  "file": "/mnt/f/git/C/CAAA/strings/testaux.c"
+},
+{
+  "directory": "/mnt/f/git/C/CAAA/build",
+  "command": "/usr/bin/cc  -I/mnt/f/git/C/CAAA/ringbuffer/src -I/mnt/f/git/C/CAAA/vector/src -I/mnt/f/git/C/CAAA/strings -I/mnt/f/git/C/CAAA/dbg    -o CMakeFiles/bstring_obj.dir/strings/utf8util.c.o   -c /mnt/f/git/C/CAAA/strings/utf8util.c",
+  "file": "/mnt/f/git/C/CAAA/strings/utf8util.c"
+},
+{
+  "directory": "/mnt/f/git/C/CAAA/build",
+  "command": "/usr/bin/cc  -I/mnt/f/git/C/CAAA/ringbuffer/src -I/mnt/f/git/C/CAAA/vector/src -I/mnt/f/git/C/CAAA/strings -I/mnt/f/git/C/CAAA/dbg    -o CMakeFiles/ringbuffer_tests.dir/ringbuffer/tests/reingbuffer_tests.c.o   -c /mnt/f/git/C/CAAA/ringbuffer/tests/reingbuffer_tests.c",
+  "file": "/mnt/f/git/C/CAAA/ringbuffer/tests/reingbuffer_tests.c"
+},
+{
+  "directory": "/mnt/f/git/C/CAAA/build",
+  "command": "/usr/bin/cc  -I/mnt/f/git/C/CAAA/ringbuffer/src -I/mnt/f/git/C/CAAA/vector/src -I/mnt/f/git/C/CAAA/strings -I/mnt/f/git/C/CAAA/dbg    -o CMakeFiles/ringbuffer_tests.dir/ringbuffer/tests/munit.c.o   -c /mnt/f/git/C/CAAA/ringbuffer/tests/munit.c",
+  "file": "/mnt/f/git/C/CAAA/ringbuffer/tests/munit.c"
+},
+{
+  "directory": "/mnt/f/git/C/CAAA/build",
+  "command": "/usr/bin/cc  -I/mnt/f/git/C/CAAA/ringbuffer/src -I/mnt/f/git/C/CAAA/vector/src -I/mnt/f/git/C/CAAA/strings -I/mnt/f/git/C/CAAA/dbg    -o CMakeFiles/ringbuffer_tests.dir/ringbuffer/src/ringbuffer.c.o   -c /mnt/f/git/C/CAAA/ringbuffer/src/ringbuffer.c",
+  "file": "/mnt/f/git/C/CAAA/ringbuffer/src/ringbuffer.c"
+},
+{
+  "directory": "/mnt/f/git/C/CAAA/build",
+  "command": "/usr/bin/cc  -I/mnt/f/git/C/CAAA/ringbuffer/src -I/mnt/f/git/C/CAAA/vector/src -I/mnt/f/git/C/CAAA/strings -I/mnt/f/git/C/CAAA/dbg    -o CMakeFiles/bintree_obj.dir/bintree/src/bintree.c.o   -c /mnt/f/git/C/CAAA/bintree/src/bintree.c",
+  "file": "/mnt/f/git/C/CAAA/bintree/src/bintree.c"
+},
+{
+  "directory": "/mnt/f/git/C/CAAA/build",
+  "command": "/usr/bin/cc  -I/mnt/f/git/C/CAAA/stack/src -I/mnt/f/git/C/CAAA/ringbuffer/src -I/mnt/f/git/C/CAAA/vector/src -I/mnt/f/git/C/CAAA/strings -I/mnt/f/git/C/CAAA/dbg    -o CMakeFiles/stack_tests.dir/stack/tests/stack_tests.c.o   -c /mnt/f/git/C/CAAA/stack/tests/stack_tests.c",
+  "file": "/mnt/f/git/C/CAAA/stack/tests/stack_tests.c"
+},
+{
+  "directory": "/mnt/f/git/C/CAAA/build",
+  "command": "/usr/bin/cc  -I/mnt/f/git/C/CAAA/stack/src -I/mnt/f/git/C/CAAA/ringbuffer/src -I/mnt/f/git/C/CAAA/vector/src -I/mnt/f/git/C/CAAA/strings -I/mnt/f/git/C/CAAA/dbg    -o CMakeFiles/stack_tests.dir/stack/tests/munit.c.o   -c /mnt/f/git/C/CAAA/stack/tests/munit.c",
+  "file": "/mnt/f/git/C/CAAA/stack/tests/munit.c"
+},
+{
+  "directory": "/mnt/f/git/C/CAAA/build",
+  "command": "/usr/bin/cc  -I/mnt/f/git/C/CAAA/queue/src -I/mnt/f/git/C/CAAA/ringbuffer/src -I/mnt/f/git/C/CAAA/vector/src -I/mnt/f/git/C/CAAA/strings -I/mnt/f/git/C/CAAA/dbg    -o CMakeFiles/queue_tests.dir/queue/tests/queue_tests.c.o   -c /mnt/f/git/C/CAAA/queue/tests/queue_tests.c",
+  "file": "/mnt/f/git/C/CAAA/queue/tests/queue_tests.c"
+},
+{
+  "directory": "/mnt/f/git/C/CAAA/build",
+  "command": "/usr/bin/cc  -I/mnt/f/git/C/CAAA/queue/src -I/mnt/f/git/C/CAAA/ringbuffer/src -I/mnt/f/git/C/CAAA/vector/src -I/mnt/f/git/C/CAAA/strings -I/mnt/f/git/C/CAAA/dbg    -o CMakeFiles/queue_tests.dir/queue/tests/munit.c.o   -c /mnt/f/git/C/CAAA/queue/tests/munit.c",
+  "file": "/mnt/f/git/C/CAAA/queue/tests/munit.c"
+},
+{
+  "directory": "/mnt/f/git/C/CAAA/build",
+  "command": "/usr/bin/cc  -I/mnt/f/git/C/CAAA/ringbuffer/src -I/mnt/f/git/C/CAAA/vector/src -I/mnt/f/git/C/CAAA/strings -I/mnt/f/git/C/CAAA/dbg    -o CMakeFiles/vector_obj.dir/vector/src/vector.c.o   -c /mnt/f/git/C/CAAA/vector/src/vector.c",
+  "file": "/mnt/f/git/C/CAAA/vector/src/vector.c"
+},
+{
+  "directory": "/mnt/f/git/C/CAAA/build",
+  "command": "/usr/bin/cc  -I/mnt/f/git/C/CAAA/ringbuffer/src -I/mnt/f/git/C/CAAA/vector/src -I/mnt/f/git/C/CAAA/strings -I/mnt/f/git/C/CAAA/dbg    -o CMakeFiles/ringbuffer_obj.dir/ringbuffer/src/ringbuffer.c.o   -c /mnt/f/git/C/CAAA/ringbuffer/src/ringbuffer.c",
+  "file": "/mnt/f/git/C/CAAA/ringbuffer/src/ringbuffer.c"
+},
+{
+  "directory": "/mnt/f/git/C/CAAA/build",
+  "command": "/usr/bin/cc  -I/mnt/f/git/C/CAAA/ringbuffer/src -I/mnt/f/git/C/CAAA/vector/src -I/mnt/f/git/C/CAAA/strings -I/mnt/f/git/C/CAAA/dbg    -o CMakeFiles/tritree_obj.dir/tritree/src/tritree.c.o   -c /mnt/f/git/C/CAAA/tritree/src/tritree.c",
+  "file": "/mnt/f/git/C/CAAA/tritree/src/tritree.c"
+},
+{
+  "directory": "/mnt/f/git/C/CAAA/build",
+  "command": "/usr/bin/cc  -I/mnt/f/git/C/CAAA/map/src -I/mnt/f/git/C/CAAA/ringbuffer/src -I/mnt/f/git/C/CAAA/vector/src -I/mnt/f/git/C/CAAA/strings -I/mnt/f/git/C/CAAA/dbg    -o CMakeFiles/map_tests.dir/map/tests/map_tests.c.o   -c /mnt/f/git/C/CAAA/map/tests/map_tests.c",
+  "file": "/mnt/f/git/C/CAAA/map/tests/map_tests.c"
+},
+{
+  "directory": "/mnt/f/git/C/CAAA/build",
+  "command": "/usr/bin/cc  -I/mnt/f/git/C/CAAA/map/src -I/mnt/f/git/C/CAAA/ringbuffer/src -I/mnt/f/git/C/CAAA/vector/src -I/mnt/f/git/C/CAAA/strings -I/mnt/f/git/C/CAAA/dbg    -o CMakeFiles/map_tests.dir/map/tests/munit.c.o   -c /mnt/f/git/C/CAAA/map/tests/munit.c",
+  "file": "/mnt/f/git/C/CAAA/map/tests/munit.c"
+},
+{
+  "directory": "/mnt/f/git/C/CAAA/build",
+  "command": "/usr/bin/cc  -I/mnt/f/git/C/CAAA/bintree/src -I/mnt/f/git/C/CAAA/ringbuffer/src -I/mnt/f/git/C/CAAA/vector/src -I/mnt/f/git/C/CAAA/strings -I/mnt/f/git/C/CAAA/dbg    -o CMakeFiles/bintree_tests.dir/bintree/tests/bintree_tests.c.o   -c /mnt/f/git/C/CAAA/bintree/tests/bintree_tests.c",
+  "file": "/mnt/f/git/C/CAAA/bintree/tests/bintree_tests.c"
+},
+{
+  "directory": "/mnt/f/git/C/CAAA/build",
+  "command": "/usr/bin/cc  -I/mnt/f/git/C/CAAA/bintree/src -I/mnt/f/git/C/CAAA/ringbuffer/src -I/mnt/f/git/C/CAAA/vector/src -I/mnt/f/git/C/CAAA/strings -I/mnt/f/git/C/CAAA/dbg    -o CMakeFiles/bintree_tests.dir/bintree/tests/munit.c.o   -c /mnt/f/git/C/CAAA/bintree/tests/munit.c",
+  "file": "/mnt/f/git/C/CAAA/bintree/tests/munit.c"
+},
+{
+  "directory": "/mnt/f/git/C/CAAA/build",
+  "command": "/usr/bin/cc  -I/mnt/f/git/C/CAAA/argparse/src -I/mnt/f/git/C/CAAA/ringbuffer/src -I/mnt/f/git/C/CAAA/vector/src -I/mnt/f/git/C/CAAA/strings -I/mnt/f/git/C/CAAA/dbg    -o CMakeFiles/argparse_tests.dir/bintree/tests/bintree_tests.c.o   -c /mnt/f/git/C/CAAA/bintree/tests/bintree_tests.c",
+  "file": "/mnt/f/git/C/CAAA/bintree/tests/bintree_tests.c"
+},
+{
+  "directory": "/mnt/f/git/C/CAAA/build",
+  "command": "/usr/bin/cc  -I/mnt/f/git/C/CAAA/argparse/src -I/mnt/f/git/C/CAAA/ringbuffer/src -I/mnt/f/git/C/CAAA/vector/src -I/mnt/f/git/C/CAAA/strings -I/mnt/f/git/C/CAAA/dbg    -o CMakeFiles/argparse_tests.dir/argparse/tests/munit.c.o   -c /mnt/f/git/C/CAAA/argparse/tests/munit.c",
+  "file": "/mnt/f/git/C/CAAA/argparse/tests/munit.c"
+},
+{
+  "directory": "/mnt/f/git/C/CAAA/build",
+  "command": "/usr/bin/cc  -I/mnt/f/git/C/CAAA/ringbuffer/src -I/mnt/f/git/C/CAAA/vector/src -I/mnt/f/git/C/CAAA/strings -I/mnt/f/git/C/CAAA/dbg    -o CMakeFiles/fileio_obj.dir/io/src/fileio.c.o   -c /mnt/f/git/C/CAAA/io/src/fileio.c",
+  "file": "/mnt/f/git/C/CAAA/io/src/fileio.c"
+},
+{
+  "directory": "/mnt/f/git/C/CAAA/build",
+  "command": "/usr/bin/cc  -I/mnt/f/git/C/CAAA/ringbuffer/src -I/mnt/f/git/C/CAAA/vector/src -I/mnt/f/git/C/CAAA/strings -I/mnt/f/git/C/CAAA/dbg    -o CMakeFiles/argparse_obj.dir/argparse/src/argparse.c.o   -c /mnt/f/git/C/CAAA/argparse/src/argparse.c",
+  "file": "/mnt/f/git/C/CAAA/argparse/src/argparse.c"
+}
+]
