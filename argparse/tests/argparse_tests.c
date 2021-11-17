@@ -20,6 +20,9 @@ MunitResult test_new(const MunitParameter params[], void* user_data_or_fixture){
 		ArgumentParser *arg = (ArgumentParser *)user_data_or_fixture;
 		check(bstrcmp((bstring)Vector_Get(arg->args_v,0),&args[0])==0,"The Value of arg0 is wrong");
 		check(bstrcmp((bstring)Vector_Get(arg->args_v,1),&args[1])==0,"The Value of arg1 is wrong");
+
+		Argparse_Parse(arg);
+		Argparse_Print_Help(arg);
 		return MUNIT_OK;
 error:
 		return MUNIT_FAIL;

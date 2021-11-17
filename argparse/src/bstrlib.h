@@ -133,7 +133,7 @@ extern int bsplitstrcb (const_bstring str, const_bstring splitStr, int pos,
 /* Miscellaneous functions */
 extern int bpattern (bstring b, int len);
 extern int btoupper (bstring b);
-extern int btolower (bstring b);
+extern int otolower (bstring b);
 extern int bltrimws (bstring b);
 extern int brtrimws (bstring b);
 extern int btrimws (bstring b);
