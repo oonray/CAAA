@@ -95,15 +95,14 @@ add_test(NAME ringbuffer_test
 
 #titree
 add_library(tritree_obj OBJECT tritree/src/tritree.c)
-add_library(tritree $<TARGET_OBJECTS:vector_obj> $<TARGET_OBJECTS:tritree_obj>)
+add_library(tritree $<TARGET_OBJECTS:vector_obj> $<TARGET_OBJECTS:tritree_obj> $<TARGET_OBJECTS:tritree_obj> $<TARGET_OBJECTS:bstring_obj>)
 install(TARGETS tritree)
 
-#TODO: Fix Tests
-#add_executable(tritree_tests tritree/tests/tritree_tests.c tritree/tests/munit.c)
-#target_include_directories(tritree_tests BEFORE PUBLIC tritree/src)
-#target_link_libraries(tritree_tests private tritree vector bstring)
-#add_test(NAME tritree_test
-#         COMMAND tritree_tests)
+add_executable(tritree_tests tritree/tests/tritree_tests.c tritree/tests/munit.c)
+target_include_directories(tritree_tests BEFORE PRIVATE tritree/src)
+target_link_libraries(tritree_tests tritree)
+add_test(NAME tritree_test
+         COMMAND tritree_tests)
 
 #bintree
 add_library(bintree_obj OBJECT bintree/src/bintree.c)
@@ -125,11 +124,12 @@ endif()
 
 #argparse
 add_library(argparse_obj OBJECT argparse/src/bstrlib.c argparse/src/argparse.c)
-add_library(argparse $<TARGET_OBJECTS:vector_obj> $<TARGET_OBJECTS:map_obj> $<TARGET_OBJECTS:argparse_obj>)
+add_library(argparse $<TARGET_OBJECTS:vector_obj> $<TARGET_OBJECTS:tritree_obj> $<TARGET_OBJECTS:argparse_obj>)
 install(TARGETS argparse)
 
 add_executable(argparse_tests argparse/tests/argparse_tests.c argparse/tests/munit.c)
 target_include_directories(argparse_tests BEFORE PRIVATE argparse/src)
+target_include_directories(argparse_tests BEFORE PRIVATE tritree/src)
 target_link_libraries(argparse_tests PRIVATE argparse)
 
 add_test(NAME argparse_test
