@@ -1,8 +1,5 @@
 #include "argparse.h"
 
-static const struct tagbstring format_str_help =
-    bsStatic("%s\t%s\t%s\t%s[default]%s\n");
-
 void PrintArgs(void *value, void *data) {
   Argument *arg = (Argument *)value;
   printf("\n\t%s\t%s\t[default]%s\t%s\t\n", bdata(arg->token), bdata(arg->name),
@@ -58,8 +55,9 @@ void Argparse_Argument_Destroy(Argument *arg) {
 int Argparse_Add_Argument(ArgumentParser *parser, Argument *arg) {
   parser->args_t = TriTree_Insert(parser->args_t, bdata(arg->token),
                                   blength(arg->token), arg);
-  parser->args_n = TriTree_Insert(parser->args_n, bdata(arg->name),
-                                  blength(arg->token), arg);
+  parser->args_n =
+      TriTree_Insert(parser->args_n, bdata(arg->name), blength(arg->name), arg);
+
   check(parser->args_t != NULL, "Could not add item");
   check(parser->args_n != NULL, "Could not add item");
   return 0;
@@ -104,6 +102,7 @@ error:
 }
 
 int Argparse_Parse(ArgumentParser *parser, int argc, char *argv[]) {
+  parser->progname = bfromcstr(argv[0]);
   for (int i = 0; i < argc; i++) {
     bstring token = bfromcstr(argv[i]);
     if (token->data[0] == '-') {
@@ -125,11 +124,13 @@ int Argparse_Parse(ArgumentParser *parser, int argc, char *argv[]) {
   return 1;
 }
 
-Argument *Argparse_Get(ArgumentParser *args, bstring name) {
-  return TriTree_Search(args->args_n, bdata(name), blength(name));
+Argument *Argparse_Get(ArgumentParser *args, const char *name) {
+  bstring name_b = bfromcstr(name);
+  return TriTree_Search(args->args_n, bdata(name_b), blength(name_b));
 }
-Argument *Argparse_Find(ArgumentParser *args, bstring token) {
-  return TriTree_Search(args->args_t, bdata(token), blength(token));
+Argument *Argparse_Find(ArgumentParser *args, const char *token) {
+  bstring token_b = bfromcstr(token);
+  return TriTree_Search(args->args_n, bdata(token_b), blength(token_b));
 }
 
 void Argparse_Print_Help(ArgumentParser *args) {

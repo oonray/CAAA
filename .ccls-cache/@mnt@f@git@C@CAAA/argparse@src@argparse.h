@@ -44,8 +44,12 @@ int Argparse_Parse(ArgumentParser *parser, int argc, char *argv[]);
 void Argparse_Destroy(ArgumentParser *parser);
 void Argparse_Argument_Destroy(Argument *arg);
 
-Argument *Argparse_Get(ArgumentParser *args, bstring name);
-Argument *Argparse_Find(ArgumentParser *args, bstring token);
+Argument *Argparse_Get(ArgumentParser *args, const char *name);
+Argument *Argparse_Find(ArgumentParser *args, const char *token);
 void Argparse_Print_Help(ArgumentParser *args);
+
+#define ArgBoolData(A) bdata((A)) == "true" ? true : false
+#define ArgIntData(A) atoi(bdata((A)))
+#define ArgStrData(A) (A)
 
 #endif // ARGPARSE_H_
