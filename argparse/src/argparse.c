@@ -1,130 +1,139 @@
 #include "argparse.h"
 
-inline const struct tagbstring format_str_help = bsStatic("%s%s%s\t%s%s%s\t%s%s%s\t%s[default]%s%s\n");
+static const struct tagbstring format_str_help =
+    bsStatic("%s\t%s\t%s\t%s[default]%s\n");
 
-ArgumentParser *Argparse_New_Argument_Parser(const bstring description,const int argc,const char *argv[]){
-  ArgumentParser *args = (ArgumentParser *)calloc(1,sizeof(ArgumentParser));
-  check(args!=NULL,"Could not Create ArgumentParser");
+void PrintArgs(void *value, void *data) {
+  Argument *arg = (Argument *)value;
+  printf("\n\t%s\t%s\t[default]%s\t%s\t\n", bdata(arg->token), bdata(arg->name),
+         bdata(arg->def), bdata(arg->help));
+}
 
-  args->args = Vector_New(sizeof(bstring),argc);
-  args->args_v = Vector_New(sizeof(bstring),argc);
-
-  for(int i=0;i<argc;++i){
-    Vector_Push(args->args_v, bfromcstr(argv[i]));
-  }
+ArgumentParser *Argparse_New_Argument_Parser(const bstring description) {
+  ArgumentParser *args = (ArgumentParser *)calloc(1, sizeof(ArgumentParser));
+  check(args != NULL, "Could not Create ArgumentParser");
 
   args->description = description;
 
-  Argparse_Add_Bool(args,bfromcstr("-h"),bfromcstr("help"),bfromcstr("false"),bfromcstr("print help"));
+  Argparse_Add_Bool(args, "-h", "help", "false", "print help");
 
   return args;
 error:
   return NULL;
 }
 
-Argument *Argument_New(const bstring type,const bstring token,const bstring name,const bstring def,const bstring help){
-  Argument *arg = (Argument *)calloc(1,sizeof(Argument));
-  check(arg!=NULL,"Could not create Argument");
+Argument *Argument_New(const bstring type, const bstring token,
+                       const bstring name, const bstring def,
+                       const bstring help) {
+  Argument *arg = (Argument *)calloc(1, sizeof(Argument));
+  check(arg != NULL, "Could not create Argument");
 
-  arg->type=type;
-  arg->token=token;
-  arg->name=name;
-  arg->def=def;
-  arg->help=help;
+  arg->type = type;
+  arg->token = token;
+  arg->name = name;
+  arg->def = def;
+  arg->help = help;
 
   return arg;
 error:
   return NULL;
 }
 
-void Argparse_Destroy(ArgumentParser *parser){
-  Vector_Destroy(parser->args);
-  Vector_Destroy(parser->args_v);
+void Argparse_Destroy(ArgumentParser *parser) {
+  TriTree_Destroy(parser->args_t);
+  TriTree_Destroy(parser->args_n);
   bdestroy(parser->description);
   free(parser);
 }
 
-void Argparse_Argument_Destroy(Argument *arg){
+void Argparse_Argument_Destroy(Argument *arg) {
   bdestroy(arg->token);
   bdestroy(arg->name);
   bdestroy(arg->help);
+
   free(arg->value);
   free(arg);
 }
 
-int Argparse_Add_Argument(ArgumentParser *parser,Argument *arg){
-  int rc = Vector_Push(parser->args,arg);
-  check(rc==0,"Could not push");
+int Argparse_Add_Argument(ArgumentParser *parser, Argument *arg) {
+  parser->args_t = TriTree_Insert(parser->args_t, bdata(arg->token),
+                                  blength(arg->token), arg);
+  parser->args_n = TriTree_Insert(parser->args_n, bdata(arg->name),
+                                  blength(arg->token), arg);
+  check(parser->args_t != NULL, "Could not add item");
+  check(parser->args_n != NULL, "Could not add item");
   return 0;
 error:
   return 1;
 }
 
-int Argparse_Add_Int(ArgumentParser *parser,bstring token,bstring name,bstring def,bstring help){
-  Argument *arg = (Argument *)Argument_New(bfromcstr("int"),token,name,def,help);
-  check(arg!=NULL,"Could not create Argument");
-  Argparse_Add_Argument(parser,arg);
+int Argparse_Add_Int(ArgumentParser *parser, const char *token,
+                     const char *name, const char *def, const char *help) {
+  Argument *arg = (Argument *)Argument_New(bfromcstr("int"), bfromcstr(token),
+                                           bfromcstr(name), bfromcstr(def),
+                                           bfromcstr(help));
+  check(arg != NULL, "Could not create Argument");
+  Argparse_Add_Argument(parser, arg);
   return 1;
 error:
   return 0;
 }
 
-int Argparse_Add_String(ArgumentParser *parser,bstring token,bstring name,bstring def,bstring help){
-  Argument *arg = Argument_New(bfromcstr("string"),token,name,def,help);
-  check(arg!=NULL,"Could not create Argument");
-  Argparse_Add_Argument(parser,arg);
+int Argparse_Add_String(ArgumentParser *parser, const char *token,
+                        const char *name, const char *def, const char *help) {
+  Argument *arg = (Argument *)Argument_New(bfromcstr("string"),
+                                           bfromcstr(token), bfromcstr(name),
+                                           bfromcstr(def), bfromcstr(help));
+  check(arg != NULL, "Could not create Argument");
+  Argparse_Add_Argument(parser, arg);
   return 1;
 error:
   return 0;
 }
 
-int Argparse_Add_Bool(ArgumentParser *parser,bstring token,bstring name,bstring def,bstring help){
-  Argument *arg = Argument_New(bfromcstr("bool"),token,name,def,help);
-  check(arg!=NULL,"Could not create Argument");
-  log_info("Adding %s",bdata(token));
-  Argparse_Add_Argument(parser,arg);
+int Argparse_Add_Bool(ArgumentParser *parser, const char *token,
+                      const char *name, const char *def, const char *help) {
+  Argument *arg = (Argument *)Argument_New(bfromcstr("bool"), bfromcstr(token),
+                                           bfromcstr(name), bfromcstr(def),
+                                           bfromcstr(help));
+  check(arg != NULL, "Could not create Argument");
+  Argparse_Add_Argument(parser, arg);
   return 1;
 error:
   return 0;
 }
 
-int Argparse_Parse(ArgumentParser *parser){
-  int len = Vector_End(parser->args_v);
-  for(int i = 0;i<len;++i){
-    bstring value = (bstring)Vector_Get(parser->args_v,i);
-    if(value->data[0]=='-'){
-      log_info("value %s",bdata(value));
-      for(int j=0;j<Vector_End(parser->args);j++){
-        Argument *arg = (Argument *)Vector_Get(parser->args,j);
-        if(bstrcmp(value,arg->token)==0){
-          if(bstrcmp(arg->type,bfromcstr("bool")!=0)){
-            arg->value = (bstring)Vector_Get(parser->args_v,i+1);
-            i++;
-          }else{
-            arg->value=bfromcstr("true");
-          }
+int Argparse_Parse(ArgumentParser *parser, int argc, char *argv[]) {
+  for (int i = 0; i < argc; i++) {
+    bstring token = bfromcstr(argv[i]);
+    if (token->data[0] == '-') {
+      if (bstrcmp(token, bfromcstr("-h")) == 0) {
+        Argparse_Print_Help(parser);
+      }
+
+      Argument *arg = Argparse_Find(parser->args_t, token);
+      if (arg != NULL) {
+        if (arg->type != "bool") {
+          ++i;
+          arg->value = bfromcstr(argv[i]);
+        } else {
+          arg->value = bfromcstr("true");
         }
       }
     }
   }
   return 1;
-error:
-  return 0;
 }
 
-void *Argparse_Get(ArgumentParser *args,bstring name){
+Argument *Argparse_Get(ArgumentParser *args, bstring name) {
+  return TriTree_Search(args->args_n, bdata(name), blength(name));
+}
+Argument *Argparse_Find(ArgumentParser *args, bstring token) {
+  return TriTree_Search(args->args_t, bdata(token), blength(token));
 }
 
-void Argparse_Print_Help(ArgumentParser *args){
-  printf("\nUsage:\t%s\nDescription:\t%s\n",bdata((bstring)Vector_Get(args->args_v,0)),bdata(args->description));
-  int len = Vector_End(args->args_v);
-  for(int i=1;i<len;i++){
-    Argument *arg = (Argument *)Vector_Get(args->args,i);
-    bstring line = bformat(format_str_help.data,
-                    bfromcstr(KYEL),arg->token,bfromcstr(KNRM),
-                    bfromcstr(KWHT),arg->name, bfromcstr(KNRM),
-                    bfromcstr(KBLU),arg->type, bfromcstr(KNRM),
-                    bfromcstr(KMAG),arg->def,  bfromcstr(KNRM));
-    printf("%s",bdata(line));
-  }
+void Argparse_Print_Help(ArgumentParser *args) {
+  TriTree_Traverse(args->args_t, PrintArgs, NULL);
+  Argparse_Destroy(args);
+  exit(0);
 }

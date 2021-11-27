@@ -40,6 +40,7 @@ static void teardown(void *fixture) { TriTree_Destroy(tree); }
 
 void traverse(void *value, void *data) {
   assert(value != NULL);
+  printf("%s\n", bdata((bstring)value));
   trav++;
 }
 
@@ -110,7 +111,7 @@ MunitTest tests[] = {
     {"Key Insert", Insert, setup, NULL, MUNIT_TEST_OPTION_NONE, NULL},
     {"Key Search", KeySearch, setup, NULL, MUNIT_TEST_OPTION_NONE, NULL},
     //{"Key Search prefix", KeySearch, setup, NULL, MUNIT_TEST_OPTION_NONE,
-    //NULL},
+    // NULL},
     {"Key Traverse", KeyTraverse, setup, NULL, MUNIT_TEST_OPTION_NONE, NULL},
     {NULL, NULL, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL}};
 
