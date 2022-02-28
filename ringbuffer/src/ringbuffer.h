@@ -5,8 +5,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <dbg.h>
-#include "bstrlib.h"
+#include <c/dbg.h>
+#include <c/bstring/bstrlib.h>
 
 typedef struct {
 	bstring buffer;
