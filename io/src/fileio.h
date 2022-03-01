@@ -13,43 +13,48 @@
 #include <c/dbg.h>
 #include <c/ringbuffer.h>
 #include <c/vector.h>
-
 #include <c/bstring/bstrlib.h>
+
+#ifndef _FILEIO_H
+#define _FILEIO_H
 
 #define SOCKFD 0x01
 #define FILEFD 0x03
 
-struct tagbstring NL = bsStatic("\n");
-struct tagbstring CRLF = bsStatic("\n\r");
+enum Descriptors{INN,OUT,ERR};
+
+static struct tagbstring NL = bsStatic("\n");
+static struct tagbstring CRLF = bsStatic("\n\r");
 
 typedef union ioReader{
-	ssize_t (*fileReader)(int, void *, size_t); 
-	ssize_t (*sockReader)(int, void *, size_t,int);
+	ssize_t (*fileReader)(int,void *, size_t);
+	ssize_t (*sockReader)(int,void *, size_t,int);
 }ioReader;
 
 typedef union ioWriter{
-	ssize_t (*fileWriter)(int, void *, size_t); 
-	ssize_t (*sockWriter)(int, void *, size_t,int);
+	ssize_t (*fileWriter)(int,const void *, size_t);
+	ssize_t (*sockWriter)(int,const void *, size_t,int);
 }ioWriter;
 
 typedef struct ioStream {
 		int fd;
 		int fd_t;
 		RingBuffer *in;
-		RingBuffer *out;
 		ioReader reader;
 		ioWriter writer;
 } ioStream;
 
 
-ioStream *NewioStream(int fd,int fd_t,int buf_t);
-ioStream *NewioStreamFile(bstring path,int buf_t);
-ioStream *NewioStreamSocket(int proto,int type,int buf_t);
+ioStream *NewIoStream(int fd,int fd_t,size_t buf_t);
+ioStream *NewIoStreamFile(bstring path,int flags,int rights,int buf_t);
+ioStream *NewIoStreamSocket(int proto,int type,int buf_t);
 
-void DestroyioStream(ioStream *io);
+void DestroyIoStream(ioStream *io);
 
-int ioRead(ioStream *str,FILE *f,size_t amount);
-int ioWrite(ioStream *str,FILE *f,size_t amount);
+int IoStreamIoRead(ioStream *str);
+int IoStreamIoWrite(ioStream *str);
 
-bstring ioReadFile(bstring *filename,int type);
-void ioCopy(ioStream a,ioStream b);
+bstring IoStreamBuffRead(ioStream *str);
+int IoStreamBuffWrite(ioStream *str, bstring input);
+
+#endif

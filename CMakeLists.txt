@@ -115,14 +115,14 @@ add_test(NAME bintree_test
 
 #fileio
 add_library(fileio_obj OBJECT io/src/fileio.c)
-add_library(fileio $<TARGET_OBJECTS:vector_obj> $<TARGET_OBJECTS:fileio_obj>)
+add_library(fileio $<TARGET_OBJECTS:ringbuffer_obj> $<TARGET_OBJECTS:fileio_obj>)
 install(TARGETS fileio)
 
-#add_executable(io_tests io/tests/io_tests.c bintree/tests/munit.c)
-#target_include_directories(bintree_tests BEFORE PRIVATE bintree/src)
-#target_link_libraries(bintree_tests PRIVATE bintree vector bstring)
-#add_test(NAME bintree_test
-#         COMMAND bintree_tests)
+add_executable(io_tests io/tests/fileio_test.c io/tests/munit.c)
+target_include_directories(io_tests BEFORE PRIVATE io/src)
+target_link_libraries(io_tests PRIVATE fileio ringbuffer bstring)
+add_test(NAME io_tests
+         COMMAND io_tests)
 
 #argparse
 add_library(argparse_obj OBJECT argparse/src/bstrlib.c argparse/src/argparse.c)
