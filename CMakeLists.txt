@@ -136,3 +136,14 @@ target_link_libraries(argparse_tests PRIVATE argparse)
 
 add_test(NAME argparse_test
          COMMAND argparse_tests)
+
+#sockets
+add_library(soc_obj OBJECT sockets/src/soc.c)
+add_library(soc $<TARGET_OBJECTS:soc_obj> $<TARGET_OBJECTS:fileio_obj> $<TARGET_OBJECTS:ringbuffer_obj>)
+install(TARGETS soc)
+
+add_executable(soc_tests sockets/tests/socket_tests.c sockets/tests/munit.c)
+target_include_directories(soc_tests BEFORE PRIVATE sockets/src)
+target_link_libraries(soc_tests PRIVATE fileio soc bstring)
+add_test(NAME soc_tests
+         COMMAND soc_tests)
