@@ -17,6 +17,12 @@ jobs:
       - run: cmake ..
         working-directory: ./build
 
+      - run: make
+        working-directory: ./build
+
+      - run: sudo make install
+        working-directory: ./build
+
       - run: cmake --build .
         working-directory: ./build
 
