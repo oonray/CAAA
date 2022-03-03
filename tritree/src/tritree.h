@@ -1,9 +1,9 @@
 #ifndef _tritree_h
 #define _tritree_h
 
-#include "bstrlib.h"
+#include <caaa/bstring/bstrlib.h>
+#include <caaa/vector.h>
 #include <stdlib.h>
-#include <vector.h>
 
 typedef struct TriTree {
   char splitchar;

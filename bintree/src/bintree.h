@@ -1,8 +1,8 @@
 #ifndef _BinTree_h
 #define _BinTree_h
 
-#include "bstrlib.h"
-#include <dbg.h>
+#include <caaa/bstring/bstrlib.h>
+#include <caaa/dbg.h>
 #include <stdlib.h>
 
 typedef int (*BinTree_Compare)(void *a, void *b);

@@ -5,10 +5,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "../../tritree/src/tritree.h"
-#include "bstrlib.h"
-#include "colors.h"
-#include "dbg.h"
+#include <caaa/bstring/bstrlib.h>
+#include <caaa/colors.h>
+#include <caaa/dbg.h>
+#include <caaa/tritree.h>
 
 typedef struct Argument {
   bstring type;
