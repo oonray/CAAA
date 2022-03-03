@@ -29,6 +29,8 @@ set(DEST "include/caaa")
 
 FILE(GLOB bstr_h strings/*.h)
 FILE(GLOB dbg_h dbg/*.h)
+FILE(COPY ${dbg_h}  DESTINATION ${DEST})
+
 install(FILES stack/src/stack.h DESTINATION ${DEST})
 install(FILES queue/src/queue.h DESTINATION ${DEST})
 install(FILES map/src/map.h DESTINATION ${DEST})
