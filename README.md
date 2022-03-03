@@ -1,5 +1,7 @@
 ## CAAA
 
+[![build CAAA deb](https://github.com/oonray/CAAA/actions/workflows/main.yaml/badge.svg)](https://github.com/oonray/CAAA/actions/workflows/main.yaml) 
+
 A Tripple A Library for C.
 C has been said to not be a Batteries included Library, So i made some Tripple A batteries.
 
