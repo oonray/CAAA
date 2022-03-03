@@ -1,8 +1,8 @@
 #ifndef __ringbuffer_h
 #define __ringbuffer_h
 
-#include <caaa/bstring/bstrlib.h>
-#include <caaa/dbg.h>
+#include "bstrlib.h"
+#include "dbg.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

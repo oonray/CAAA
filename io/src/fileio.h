@@ -10,10 +10,10 @@
 #include <sys/uio.h>
 #include <unistd.h>
 
-#include <caaa/bstring/bstrlib.h>
-#include <caaa/dbg.h>
-#include <caaa/ringbuffer.h>
-#include <caaa/vector.h>
+#include "bstrlib.h"
+#include "dbg.h"
+#include "ringbuffer.h"
+#include "vector.h"
 
 #ifndef _FILEIO_H
 #define _FILEIO_H

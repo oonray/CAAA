@@ -1,8 +1,8 @@
 #ifndef _tritree_h
 #define _tritree_h
 
-#include <caaa/bstring/bstrlib.h>
-#include <caaa/vector.h>
+#include "bstrlib.h"
+#include "vector.h"
 #include <stdlib.h>
 
 typedef struct TriTree {

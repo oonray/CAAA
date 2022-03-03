@@ -1,7 +1,7 @@
 #ifndef __vector_h
 #define __vector_h
+#include "dbg.h"
 #include <assert.h>
-#include <caaa/dbg.h>
 #include <stdlib.h>
 
 typedef int(Vector_Traverse_Func)(void *data);

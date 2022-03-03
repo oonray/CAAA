@@ -1,9 +1,9 @@
 #ifndef __map_h
 #define __map_h
 
-#include <caaa/bstring/bstrlib.h>
-#include <caaa/dbg.h>
-#include <caaa/vector.h>
+#include "bstrlib.h"
+#include "dbg.h"
+#include "vector.h"
 #include <stdint.h>
 
 #define DEFAULT_BUCKET_NUM 100
