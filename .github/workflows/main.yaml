@@ -29,3 +29,20 @@ jobs:
           tag: 1.0
           artifacts: build/*.deb
           token: ${{ secrets.GITHUB_TOKEN }}
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+
+      - run: sudo apt-get install -y build-essential cmake
+
+      - run: mkdir -p build
+      - run: cmake ..
+        working-directory: ./build
+
+      - run: make
+        working-directory: ./build
+
+      - run: make test
+        working-directory: ./build
