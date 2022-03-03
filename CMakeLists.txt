@@ -25,22 +25,11 @@ set(DEST "include/caaa")
 FILE(GLOB bstr_h strings/*.h)
 FILE(GLOB dbg_h dbg/*.h)
 FILE(GLOB inc_src */src)
+FILE(GLOB inc_src_h ${inc_src/*.h)
 
-FILE(INSTALL ${dbg_h}  DESTINATION ${DEST})
-FILE(INSTALL ${bstr_h} DESTINATION ${DEST})
-
-install(FILES stack/src/stack.h DESTINATION ${DEST})
-install(FILES queue/src/queue.h DESTINATION ${DEST})
-install(FILES map/src/map.h DESTINATION ${DEST})
-install(FILES vector/src/vector.h DESTINATION ${DEST})
-install(FILES ringbuffer/src/ringbuffer.h DESTINATION ${DEST})
-install(FILES tritree/src/tritree.h DESTINATION ${DEST})
 install(FILES ${bstr_h} DESTINATION ${DEST})
 install(FILES ${dbg_h} DESTINATION ${DEST})
-install(FILES bintree/src/bintree.h DESTINATION ${DEST})
-install(FILES io/src/fileio.h DESTINATION ${DEST})
-install(FILES argparse/src/argparse.h DESTINATION ${DEST})
-
+install(FILES ${inc_src_h} DESTINATION ${DEST})
 
 #bstrlib
 #@author websnarf
