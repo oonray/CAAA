@@ -25,7 +25,7 @@ set(DEST "include/caaa")
 FILE(GLOB bstr_h strings/*.h)
 FILE(GLOB dbg_h dbg/*.h)
 FILE(GLOB inc_src */src)
-FILE(GLOB inc_src_h ${inc_src/*.h)
+FILE(GLOB inc_src_h ${inc_src}/*.h)
 
 install(FILES ${bstr_h} DESTINATION ${DEST})
 install(FILES ${dbg_h} DESTINATION ${DEST})
