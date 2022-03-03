@@ -25,11 +25,11 @@ set(DEST "include/caaa")
 FILE(GLOB bstr_h strings/*.h)
 FILE(GLOB dbg_h dbg/*.h)
 FILE(GLOB inc_src */src)
-FILE(GLOB inc_src_h ${inc_src}/*.h)
+FILE(GLOB all_h */src/*.h)
 
 install(FILES ${bstr_h} DESTINATION ${DEST})
 install(FILES ${dbg_h} DESTINATION ${DEST})
-install(FILES ${inc_src_h} DESTINATION ${DEST})
+install(FILES ${all_h} DESTINATION ${DEST})
 
 #bstrlib
 #@author websnarf
