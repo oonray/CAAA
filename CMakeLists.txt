@@ -4,13 +4,28 @@ project(CAAA VERSION 1.0)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 enable_testing()
 
+set(CPACK_PACKAGE_VENDOR "oonray")
+set(CPACK_PACKAGE_CONTACT "alexanderbjornsrud@gmail.com")
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "oonray")
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LISENCE")
+set(CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
+set(CPACK_DEBIAN_FILE_NAME DEB-DEFAULT)
+set(CPACK_DEB_COMPONENT_INSTALL YES)
+include(CPack)
+
+set(CPACK_OUTPUT_FILE_PREFIX "${CMAKE_SOURCE_DIR}/_packages")
+set(CPACK_PACKAGE_NAME ${PROJECT_NAME} CACHE STRING "caaa")
+set(CPACK_VERBATIM_VARIABLES YES)
+set(CPACK_PACKAGE_INSTALL_DIRECTORY ${CPACK_PACKAGE_NAME})
+set(CPACK_PACKAGING_INSTALL_PREFIX "/opt/caaa")
+
 include_directories(BEFORE dbg)
 include_directories(BEFORE strings)
 include_directories(BEFORE vector/src)
 include_directories(BEFORE ringbuffer/src)
 
 #HFILES
-set(DEST "include/c")
+set(DEST "include/caaa")
 
 FILE(GLOB bstr_h strings/*.h)
 FILE(GLOB dbg_h dbg/*.h)

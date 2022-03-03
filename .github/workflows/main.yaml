@@ -1,0 +1,31 @@
+name: build CAAA deb
+
+on:
+  push:
+    branches:
+      - 'main'
+jobs:
+  binaries:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+
+      - run: apt-get install -y build-essential cmake
+
+      - run: mkdir -p build
+      - run: cmake ..
+        working-directory: ./build
+
+      - run: cmake --build .
+        working-directory: ./build
+
+      - run: cpack -G deb
+        working-directory: ./build
+
+      - uses: ncipollo/release-action@v1
+        with:
+          name: latest
+          tag: 1.0
+          artifacts: build/*.deb
+          token: ${{ secrets.GITHUB_TOKEN }}

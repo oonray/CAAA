@@ -5,17 +5,18 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 
-typedef struct AsocServer {
+typedef struct Asoc {
 	bstring host;
 	bstring port;
 	ioStream *io;
 	struct sockaddr_in addr;
-} AsocServer;
+} Asoc;
 
-AsocServer *AsocServer_New(int proto, int type,int port,bstring ip);
-void AsocServer_Destroy(AsocServer *srv);
-int AsocBind(AsocServer *srv);
-int AsocListen(AsocServer *srv,int backlog);
-struct sockaddr_in *AsocAccept(AsocServer *srv);
+Asoc *Asoc_New(int proto, int type,int port,bstring ip);
+void Asoc_Destroy(Asoc *srv);
+int AsocBind(Asoc *srv);
+int AsocListen(Asoc *srv,int backlog);
+int AsocConnect(Asoc *srv);
+struct sockaddr_in *AsocAccept(Asoc *srv);
 
 #endif
