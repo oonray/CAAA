@@ -3,7 +3,7 @@ name: build CAAA deb
 on:
   push:
     branches:
-      - 'main'
+      - 'master'
 jobs:
   deb:
     runs-on: ubuntu-latest
