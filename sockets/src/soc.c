@@ -3,7 +3,7 @@
 Asoc *Asoc_New(int proto, int type,int port,bstring ip){
     Asoc *srv = calloc(1,sizeof(Asoc));
     check(srv != NULL,"Could not create Server");
-    srv->io = NewIoStreamSocket(proto,type,1024*10);
+    srv->io = NewIoStreamSocketSOC(proto,type,1024*10);
 
     srv->addr.sin_family = proto;
     srv->addr.sin_port = htons(port);

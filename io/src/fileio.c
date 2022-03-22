@@ -12,6 +12,12 @@ ioStream *NewIoStream(int fd,int fd_t,size_t buf_t){
 				out->reader.sockReader = &recv;
 				out->writer.sockWriter = &send;
 			break;
+#ifdef HEADER_SSL_H
+			case SSLFD:
+				out->reader.sockReader = &SSL_read;
+				out->writer.sockWriter = &SSL_write;
+			break;
+#endif
 			default:
 				out->reader.fileReader = &read;
 				out->writer.fileWriter = &write;
@@ -35,13 +41,26 @@ error:
 	return NULL;
 }
 
-ioStream *NewIoStreamSocket(int proto,int type,int buf_t){
-	int fd = socket(AF_INET,SOCK_STREAM,0);
+ioStream *NewIoStreamSocket(int inet, int type, int FD, int buf_t){
+	int fd = socket(inet,type,0);
 	check(fd!=0,"Could not open file");
-	return NewIoStream(fd,SOCKFD,buf_t);
+	return NewIoStream(fd,FD,buf_t);
 error:
 	return NULL;
 }
+
+ioStream *NewIoStreamSocketSOC(int inet, int type,int buf_t){
+	return NewIoStreamSocket(inet,type, SOCKFD,buf_t);
+}
+
+#ifdef HEADER_SSL_H
+ioStream *NewIoStreamSocketSSL(int inet, int type,int buf_t){
+	ioStream * str = NewIoStreamSocket(int inet, int type,SSLFD,buf_t);
+	return str;
+error:
+	return NULL;
+}
+#endif
 
 void DestroyIoStream(ioStream *io){
 	if(io != NULL){
@@ -61,7 +80,15 @@ int IoStreamIoRead(ioStream *str){
 		rc = str->reader.sockReader(str->fd,
 									 RingBuffer_Starts_At(str->in),
 									 RingBuffer_Avaliable_Space(str->in),0);
-	}else{
+	}
+#ifdef HEADER_SSL_H
+	else if (str->fd_t == SSLFD){
+		rc = str->reader.sslSocketReader(str->sslfd,
+									 RingBuffer_Starts_At(str->in),
+									 RingBuffer_Avaliable_Space(str->in),0);
+	}
+#endif
+	else{
 		rc = str->reader.fileReader(str->fd,
 									 RingBuffer_Starts_At(str->in),
 									 RingBuffer_Avaliable_Space(str->in));
@@ -82,7 +109,13 @@ int IoStreamIoWrite(ioStream *str){
 
 	if(str->fd_t == SOCKFD){
 		rc = str->writer.sockWriter(str->fd,bdata(data),blength(data),0);
-	}else{
+	}
+#ifdef HEADER_SSL_H
+	else if (str->fd_t == SSLFD){
+		rc = str->reader.sslSocketWriter(str->sslfd,bdata(data),blength(data),0);
+	}
+#endif
+	else{
 		rc = str->writer.fileWriter(str->fd,bdata(data),blength(data));
 	}
 
@@ -111,7 +144,45 @@ int IoStreamBuffWrite(ioStream *str, bstring input){
 
 	check(rc!=0,"Failed to read form %s",str->fd_t==SOCKFD?"Socket":"File");
 	RingBuffer_Commit_Write(str->in,rc);
+
 	return rc;
 error:
+	return -1;
+}
+
+int IoFileStream_FileExists(bstring file){
+	struct stat st;
+	int rc = stat(file->data,&st);
+	check(rc>=0,"File Not Found");
+	return rc;
+error:
+	return -1;
+}
+
+int IoFileStream_FileCreate(bstring file,int prem){
+	int fd = open(file->data,O_CREAT|O_RDWR|O_TRUNC,prem);
+	check(fd>0,"File %s could not be created",bdata(file));
+	return fd;
+error:
+	close(fd);
+	return -1;
+}
+
+int IoFileStream_DirectoryExists(bstring directory){
+	struct stat st;
+	int rc = stat(directory->data,&st);
+	check(rc>=0,"Directory Not Found");
+	return 0;
+error:
+	return -1;
+}
+
+int IoFileStream_DirectoryCreate(bstring directory, int prem){
+	int fd = mkdir(directory->data,prem);
+	check(fd>=0,"Directory could not be created");
+	close(fd);
+	return 0;
+error:
+	close(fd);
 	return -1;
 }
