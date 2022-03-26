@@ -18,6 +18,8 @@ jobs:
         working-directory: ./lib
       - run: make
         working-directory: ./lib/tomlc99
+      - run: mv libtoml.pc.sample libtoml.pc
+        working-directory: ./lib/tomlc99
       - run: sudo make install
         working-directory: ./lib/tomlc99
 
@@ -49,6 +51,8 @@ jobs:
       - run: git clone https://github.com/cktan/tomlc99.git
         working-directory: ./lib
       - run: make
+        working-directory: ./lib/tomlc99
+      - run: mv libtoml.pc.sample libtoml.pc
         working-directory: ./lib/tomlc99
       - run: sudo make install
         working-directory: ./lib/tomlc99
