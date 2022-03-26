@@ -16,7 +16,9 @@ jobs:
       - run: mkdir -p lib
       - run: git clone https://github.com/cktan/tomlc99.git
         working-directory: ./lib
-      - run: sudo make && sudo make install
+      - run: make
+        working-directory: ./lib/tomlc99
+      - run: sudo make install
         working-directory: ./lib/tomlc99
 
       - run: mkdir -p build
@@ -46,7 +48,9 @@ jobs:
       - run: mkdir -p lib
       - run: git clone https://github.com/cktan/tomlc99.git
         working-directory: ./lib
-      - run: sudo make && sudo make install
+      - run: make
+        working-directory: ./lib/tomlc99
+      - run: sudo make install
         working-directory: ./lib/tomlc99
 
       - run: mkdir -p build
