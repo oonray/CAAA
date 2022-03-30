@@ -176,3 +176,18 @@ target_include_directories(soc_tests BEFORE PRIVATE ${inc_src})
 target_link_libraries(soc_tests PRIVATE fileio soc bstring)
 add_test(NAME soc_tests
          COMMAND soc_tests)
+
+#request
+add_library(req_obj OBJECT webserver/src/request.c)
+add_library(req $<TARGET_OBJECTS:req_obj> $<TARGET_OBJECTS:soc_obj> $<TARGET_OBJECTS:fileio_obj> $<TARGET_OBJECTS:ringbuffer_obj> $<TARGET_OBJECTS:tritree_obj>)
+target_include_directories(req_obj PRIVATE ${inc_src})
+install(TARGETS req)
+add_dependencies(req fileio)
+add_dependencies(req soc)
+add_dependencies(req tritree)
+
+add_executable(req_tests webserver/tests/request_tests.c sockets/tests/munit.c)
+target_include_directories(req_tests PRIVATE ${inc_src})
+target_link_libraries(req_tests PRIVATE req fileio soc bstring tritree)
+add_test(NAME req_tests
+         COMMAND req_tests)
