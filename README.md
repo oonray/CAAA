@@ -8,3 +8,4 @@ C has been said to not be a Batteries included Library, So i made some Tripple A
 ### Atribution
 * Code is the result of me reading Learn C the hard way by Zed Shaw.
 * Includes [bstrlib](https://github.com/websnarf/bstrlib)
+* Includes [tomlc99](https://github.com/cktan/tomlc99)

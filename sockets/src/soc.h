@@ -1,5 +1,5 @@
-#ifndef _Asock
-#define _Asock
+#ifndef _ASOCK_H
+#define _ASOCK_H
 
 #include "fileio.h"
 #include <netinet/in.h>
@@ -10,6 +10,9 @@ typedef struct Asoc {
   bstring port;
   ioStream *io;
   struct sockaddr_in addr;
+#ifdef HEADER_SSL_H
+  SSL *ssl;
+#endif
 } Asoc;
 
 Asoc *Asoc_New(int proto, int type, int port, bstring ip);
@@ -17,6 +20,6 @@ void Asoc_Destroy(Asoc *srv);
 int AsocBind(Asoc *srv);
 int AsocListen(Asoc *srv, int backlog);
 int AsocConnect(Asoc *srv);
-struct sockaddr_in *AsocAccept(Asoc *srv);
+Asoc *AsocAccept(Asoc *srv);
 
 #endif

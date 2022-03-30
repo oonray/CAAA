@@ -191,3 +191,36 @@ target_include_directories(req_tests PRIVATE ${inc_src})
 target_link_libraries(req_tests PRIVATE req fileio soc bstring tritree)
 add_test(NAME req_tests
          COMMAND req_tests)
+#ssl
+find_package(OpenSSL)
+add_library(soc_ssl_obj OBJECT sockets/src/ssl.c)
+add_library(soc_ssl $<TARGET_OBJECTS:soc_ssl_obj> $<TARGET_OBJECTS:soc_obj> $<TARGET_OBJECTS:fileio_obj> $<TARGET_OBJECTS:ringbuffer_obj>)
+target_include_directories(soc_ssl_obj PRIVATE ${inc_src})
+target_link_libraries(soc_ssl PRIVATE OpenSSL::SSL)
+install(TARGETS soc_ssl)
+add_dependencies(soc fileio)
+add_dependencies(soc ringbuffer)
+add_dependencies(soc_ssl fileio)
+
+add_executable(soc_ssl_tests sockets/tests/ssl_tests.c sockets/tests/munit.c)
+target_include_directories(soc_ssl_tests BEFORE PRIVATE ${inc_src})
+target_link_libraries(soc_ssl_tests PRIVATE fileio soc_ssl bstring toml)
+add_test(NAME soc_ssl_tests
+         COMMAND soc_ssl_tests)
+
+#Webserver
+#IO
+#  add_library(wsio_obj OBJECT webserver/io/src/request.c)
+#  add_library(wsio $<TARGET_OBJECTS:fileio_obj> $<TARGET_OBJECTS:wsio_obj> $<TARGET_OBJECTS:ringbuffer_obj> $<TARGET_OBJECTS:map_obj>)
+#  target_include_directories(wsio_obj PRIVATE ${inc_src})
+#  install(TARGETS wsio)
+#  add_dependencies(wsio fileio)
+#  add_dependencies(wsio ringbuffer)
+#  add_dependencies(wsio map)
+
+#  add_executable(webio_tests webserver/io/tests/webio_tests.c webserver/io/tests//munit.c)
+#  target_include_directories(webio_tests BEFORE PRIVATE ${inc_src})
+#  target_include_directories(webio_tests BEFORE PRIVATE webserver/io/src)
+#  target_link_libraries(webio_tests PRIVATE fileio wsio bstring map)
+#  add_test(NAME webio_tests
+#           COMMAND webio_tests)

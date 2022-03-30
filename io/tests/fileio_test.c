@@ -17,7 +17,7 @@ error:
 }
 
 MunitResult test_new_socket(const MunitParameter params[], void* user_data_or_fixture){
-    ioStream *stream = NewIoStreamSocket(AF_INET,SOCK_STREAM,1024*10);
+    ioStream *stream = NewIoStreamSocket(AF_INET,SOCK_STREAM,SOCKFD,1024*10);
     check(stream != NULL,"Could not create Stream");
     DestroyIoStream(stream);
     return MUNIT_OK;

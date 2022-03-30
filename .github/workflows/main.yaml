@@ -13,6 +13,16 @@ jobs:
 
       - run: sudo apt-get install -y build-essential cmake
 
+      - run: mkdir -p lib
+      - run: git clone https://github.com/cktan/tomlc99.git
+        working-directory: ./lib
+      - run: make
+        working-directory: ./lib/tomlc99
+      - run: mv libtoml.pc.sample libtoml.pc
+        working-directory: ./lib/tomlc99
+      - run: sudo make install
+        working-directory: ./lib/tomlc99
+
       - run: mkdir -p build
       - run: cmake ..
         working-directory: ./build
@@ -36,6 +46,16 @@ jobs:
       - uses: actions/setup-go@v2
 
       - run: sudo apt-get install -y build-essential cmake
+
+      - run: mkdir -p lib
+      - run: git clone https://github.com/cktan/tomlc99.git
+        working-directory: ./lib
+      - run: make
+        working-directory: ./lib/tomlc99
+      - run: mv libtoml.pc.sample libtoml.pc
+        working-directory: ./lib/tomlc99
+      - run: sudo make install
+        working-directory: ./lib/tomlc99
 
       - run: mkdir -p build
       - run: cmake ..
