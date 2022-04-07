@@ -43,8 +43,8 @@ MunitResult test_code(const MunitParameter params[],
   bstring code = Response_Status_TXT(404);
   check(bstrcmp(code, bfromcstr("Not Found")) == 0,
         "Wrong response text recieved");
-  log_info("%s", bdata(code));
 
+  // 200
   code = Response_Status_TXT(200);
   check(bstrcmp(code, bfromcstr("OK")) == 0, "Wrong response text recieved");
   return MUNIT_OK;
@@ -61,17 +61,22 @@ MunitResult test_response(const MunitParameter params[],
   log_info("Loading Request");
   Request *r = Request_New(RingBuffer_Get_All(req->in));
   check(r != NULL, "Error in getting Request");
+  log_info("Request Loaded");
 
   // Request GOT
   // Default
-  Response *rsp = Response_New(r, 0);
+  log_info("Creating Response");
+  Response *rsp = Response_New(r, bfromcstr(""), 0, NULL);
   check(rsp != NULL, "error when creating request");
+
+  log_info("Response Created");
   check(rsp->status_code == 200, "wrong code got when expecting 200");
   check(bstrcmp(rsp->reason_phrase, bfromcstr("OK")) == 0,
         "wrong reason got %s", bdata(rsp->reason_phrase));
   check(bstrcmp(rsp->version, r->version) == 0, "Wrong version returned");
-
   log_info("%s", bdata(rsp->status_line));
+
+  log_info("\n------\n%s\n------\n", bdata(Response_To_String(rsp)));
 
   return MUNIT_OK;
 error:
