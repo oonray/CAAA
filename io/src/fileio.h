@@ -6,9 +6,9 @@
 #include <stdlib.h>
 #include <sys/select.h>
 #include <sys/socket.h>
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/uio.h>
-#include <sys/stat.h>
 #include <unistd.h>
 
 #include "bstrlib.h"
@@ -56,9 +56,9 @@ ioStream *NewIoStream(int fd, int fd_t, size_t buf_t);
 ioStream *NewIoStreamFile(bstring path, int flags, int rights, int buf_t);
 ioStream *NewIoStreamSocket(int inet, int type, int FD, int buf_t);
 
-ioStream *NewIoStreamSocketSOC(int inet, int type,int buf_t);
+ioStream *NewIoStreamSocketSOC(int inet, int type, int buf_t);
 #ifdef HEADER_SSL_H
-ioStream *NewIoStreamSocketSSL(SSL *ssl,int inet, int type,int buf_t);
+ioStream *NewIoStreamSocketSSL(SSL *ssl, int inet, int type, int buf_t);
 #endif
 
 void DestroyIoStream(ioStream *io);
@@ -69,10 +69,10 @@ int IoStreamIoWrite(ioStream *str);
 bstring IoStreamBuffRead(ioStream *str);
 int IoStreamBuffWrite(ioStream *str, bstring input);
 
-//File Operations
+// File Operations
 int IoFileStream_FileExists(bstring file);
 int IoFileStream_FileCreate(bstring file, int prem);
 int IoFileStream_DirectoryExists(bstring directory);
-int IoFileStream_DirectoryCreate(bstring directory,int prem);
+int IoFileStream_DirectoryCreate(bstring directory, int prem);
 
 #endif

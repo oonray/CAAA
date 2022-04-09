@@ -208,19 +208,24 @@ target_link_libraries(soc_ssl_tests PRIVATE fileio soc_ssl bstring toml)
 add_test(NAME soc_ssl_tests
          COMMAND soc_ssl_tests)
 
-#Webserver
-#IO
-#  add_library(wsio_obj OBJECT webserver/io/src/request.c)
-#  add_library(wsio $<TARGET_OBJECTS:fileio_obj> $<TARGET_OBJECTS:wsio_obj> $<TARGET_OBJECTS:ringbuffer_obj> $<TARGET_OBJECTS:map_obj>)
-#  target_include_directories(wsio_obj PRIVATE ${inc_src})
-#  install(TARGETS wsio)
-#  add_dependencies(wsio fileio)
-#  add_dependencies(wsio ringbuffer)
-#  add_dependencies(wsio map)
+#web
+add_library(web_obj OBJECT webserver/src/webserver.c webserver/src/request.c)
+add_library(web $<TARGET_OBJECTS:web_obj>
+   $<TARGET_OBJECTS:req_obj>
+   $<TARGET_OBJECTS:soc_obj>
+   $<TARGET_OBJECTS:soc_ssl_obj>
+   $<TARGET_OBJECTS:fileio_obj>
+   $<TARGET_OBJECTS:tritree_obj>
+   $<TARGET_OBJECTS:ringbuffer_obj>
+   $<TARGET_OBJECTS:map_obj>)
+target_include_directories(web_obj PRIVATE ${inc_src})
+install(TARGETS web)
+add_dependencies(web fileio)
+add_dependencies(web soc)
+add_dependencies(web tritree)
 
-#  add_executable(webio_tests webserver/io/tests/webio_tests.c webserver/io/tests//munit.c)
-#  target_include_directories(webio_tests BEFORE PRIVATE ${inc_src})
-#  target_include_directories(webio_tests BEFORE PRIVATE webserver/io/src)
-#  target_link_libraries(webio_tests PRIVATE fileio wsio bstring map)
-#  add_test(NAME webio_tests
-#           COMMAND webio_tests)
+add_executable(web_tests webserver/tests/webserver_test.c webserver/tests/munit.c)
+target_include_directories(web_tests PRIVATE ${inc_src})
+target_link_libraries(web_tests PRIVATE web req fileio toml soc_ssl soc bstring tritree)
+add_test(NAME web_tests
+         COMMAND web_tests)

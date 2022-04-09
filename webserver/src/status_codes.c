@@ -1,7 +1,7 @@
 #ifndef STATUS_CODES_H_
 #define STATUS_CODES_H_
 
-#include <caaa/bstrlib.h>
+#include "bstrlib.h"
 
 static struct tagbstring def = bsStatic("Non supported code");
 static struct tagbstring r418 = bsStatic("I'm a teapot");

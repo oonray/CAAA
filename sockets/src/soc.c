@@ -37,7 +37,7 @@ int AsocBind(Asoc *srv) {
 }
 
 int AsocListen(Asoc *srv, int backlog) {
-  return listen(srv->io->fd, backlog <= 0 ? 50 : backlog);
+  return listen(srv->io->fd, (backlog == 0 ? 10 : backlog));
 }
 
 int AsocConnect(Asoc *srv) {
@@ -53,9 +53,11 @@ Asoc *AsocAccept(Asoc *srv) {
   socklen_t peer_len = sizeof(client->addr);
   int c_soc = accept(srv->io->fd, (struct sockaddr *)&client->addr,
                      (socklen_t *)&peer_len);
-  check(c_soc >= 0, "Could not accept connection");
 
-  srv->io = NewIoStream(c_soc, SOCKFD, 1024 * 10);
+  check(c_soc != 0, "Could not accept connection");
+  // Creates errno 10 no child processes
+
+  client->io = NewIoStream(c_soc, SOCKFD, 1024 * 10);
   return client;
 error:
   return NULL;
