@@ -81,9 +81,15 @@ Response *Response_New(Request *req, bstring content, int status,
   if (Response_Set_Date(resp) != 0)
     log_info("Error when setting date");
 
+  Map_Set(resp->Headders, bfromcstr("Connection"), bfromcstr("close"));
+
+  int lenght = content == NULL ? 0 : blength(content);
+  Map_Set(resp->Headders, bfromcstr("Content-Length"), bformat("%d", lenght));
+  Map_Set(resp->Headders, bfromcstr("Content-Type"), bfromcstr("text/html"));
+
   // https://datatracker.ietf.org/doc/html/rfc2616#section-14.5
   // Accept-Ranges
-  Map_Set(resp->Headders, bfromcstr("Accept-Rages"), bfromcstr("none"));
+  // Map_Set(resp->Headders, bfromcstr("Accept-Rages"), bfromcstr("none"));
   /*
   **  Servers that do not accept any kind of range request for a
         resource MAY send
@@ -165,7 +171,8 @@ bstring Response_To_String(Response *rsp) {
     }
   }
 
-  bconcat(out, &CRLF);
+  bconcat(out, bfromcstr("\n\r"));
   bconcat(out, rsp->body);
+  bconcat(out, bfromcstr("\n"));
   return out;
 }

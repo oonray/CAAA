@@ -50,9 +50,10 @@ MunitResult test_accept(const MunitParameter params[],
   log_info("Listening on 0.0.0.0:31337");
   check(AsocConnect(client) >= 0, "could not connect to localhost:31337");
 
-  struct sockaddr_in *peer = AsocAccept(srv);
+  Asoc *peer = AsocAccept(srv);
   check(peer != NULL, "Did not accept connection");
-  log_info("Connection from %s:%d", inet_ntoa(peer->sin_addr), peer->sin_port);
+  log_info("Connection from %s:%d", inet_ntoa(peer->addr.sin_addr),
+           peer->addr.sin_port);
 
   Asoc_Destroy(client);
   Asoc_Destroy(srv);
