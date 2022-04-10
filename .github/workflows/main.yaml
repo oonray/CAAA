@@ -67,6 +67,7 @@ jobs:
       - run: openssl help
         working-directory: ./build
 
-      - run: /bin/bash -c './build/soc_ssl_tests'
+      - run: /bin/bash -c 'soc_ssl_tests'
+        working-directory: ./build
       #- run: make test
       #  working-directory: ./build
