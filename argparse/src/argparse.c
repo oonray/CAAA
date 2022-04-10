@@ -6,7 +6,7 @@ void PrintArgs(void *value, void *data) {
          bdata(arg->def), bdata(arg->help));
 }
 
-ArgumentParser *Argparse_New_Argument_Parser(const bstring description) {
+ArgumentParser *Argparse_New_Argument_Parser(bstring description) {
   ArgumentParser *args = (ArgumentParser *)calloc(1, sizeof(ArgumentParser));
   check(args != NULL, "Could not Create ArgumentParser");
 
@@ -19,9 +19,8 @@ error:
   return NULL;
 }
 
-Argument *Argument_New(const bstring type, const bstring token,
-                       const bstring name, const bstring def,
-                       const bstring help) {
+Argument *Argument_New(bstring type, bstring token, bstring name, bstring def,
+                       bstring help) {
   Argument *arg = (Argument *)calloc(1, sizeof(Argument));
   check(arg != NULL, "Could not create Argument");
 
@@ -65,8 +64,8 @@ error:
   return 1;
 }
 
-int Argparse_Add_Int(ArgumentParser *parser, const char *token,
-                     const char *name, const char *def, const char *help) {
+int Argparse_Add_Int(ArgumentParser *parser, char *token, char *name, char *def,
+                     char *help) {
   Argument *arg = (Argument *)Argument_New(bfromcstr("int"), bfromcstr(token),
                                            bfromcstr(name), bfromcstr(def),
                                            bfromcstr(help));
@@ -77,8 +76,8 @@ error:
   return 0;
 }
 
-int Argparse_Add_String(ArgumentParser *parser, const char *token,
-                        const char *name, const char *def, const char *help) {
+int Argparse_Add_String(ArgumentParser *parser, char *token, char *name,
+                        char *def, char *help) {
   Argument *arg = (Argument *)Argument_New(bfromcstr("string"),
                                            bfromcstr(token), bfromcstr(name),
                                            bfromcstr(def), bfromcstr(help));
@@ -89,8 +88,8 @@ error:
   return 0;
 }
 
-int Argparse_Add_Bool(ArgumentParser *parser, const char *token,
-                      const char *name, const char *def, const char *help) {
+int Argparse_Add_Bool(ArgumentParser *parser, char *token, char *name,
+                      char *def, char *help) {
   Argument *arg = (Argument *)Argument_New(bfromcstr("bool"), bfromcstr(token),
                                            bfromcstr(name), bfromcstr(def),
                                            bfromcstr(help));
@@ -124,11 +123,11 @@ int Argparse_Parse(ArgumentParser *parser, int argc, char *argv[]) {
   return 1;
 }
 
-Argument *Argparse_Get(ArgumentParser *args, const char *name) {
+Argument *Argparse_Get(ArgumentParser *args, char *name) {
   bstring name_b = bfromcstr(name);
   return TriTree_Search(args->args_n, bdata(name_b), blength(name_b));
 }
-Argument *Argparse_Find(ArgumentParser *args, const char *token) {
+Argument *Argparse_Find(ArgumentParser *args, char *token) {
   bstring token_b = bfromcstr(token);
   return TriTree_Search(args->args_n, bdata(token_b), blength(token_b));
 }

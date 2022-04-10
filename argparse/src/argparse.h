@@ -28,24 +28,23 @@ typedef struct ArgumentParser {
 
 void PrintArgs(void *value, void *data);
 
-ArgumentParser *Argparse_New_Argument_Parser(const bstring description);
-Argument *Argument_New(const bstring type, const bstring token,
-                       const bstring name, const bstring def,
-                       const bstring help);
+ArgumentParser *Argparse_New_Argument_Parser(bstring description);
+Argument *Argument_New(bstring type, bstring token, bstring name, bstring def,
+                       bstring help);
 
-int Argparse_Add_Int(ArgumentParser *parser, const char *token,
-                     const char *name, const char *def, const char *help);
-int Argparse_Add_String(ArgumentParser *parser, const char *token,
-                        const char *name, const char *def, const char *help);
-int Argparse_Add_Bool(ArgumentParser *parser, const char *token,
-                      const char *name, const char *def, const char *help);
+int Argparse_Add_Int(ArgumentParser *parser, char *token, char *name, char *def,
+                     char *help);
+int Argparse_Add_String(ArgumentParser *parser, char *token, char *name,
+                        char *def, char *help);
+int Argparse_Add_Bool(ArgumentParser *parser, char *token, char *name,
+                      char *def, char *help);
 
 int Argparse_Parse(ArgumentParser *parser, int argc, char *argv[]);
 void Argparse_Destroy(ArgumentParser *parser);
 void Argparse_Argument_Destroy(Argument *arg);
 
-Argument *Argparse_Get(ArgumentParser *args, const char *name);
-Argument *Argparse_Find(ArgumentParser *args, const char *token);
+Argument *Argparse_Get(ArgumentParser *args, char *name);
+Argument *Argparse_Find(ArgumentParser *args, char *token);
 void Argparse_Print_Help(ArgumentParser *args);
 
 #define ArgBoolData(A) bdata((A)) == "true" ? true : false
