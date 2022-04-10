@@ -218,7 +218,9 @@ add_library(web $<TARGET_OBJECTS:web_obj>
    $<TARGET_OBJECTS:tritree_obj>
    $<TARGET_OBJECTS:ringbuffer_obj>
    $<TARGET_OBJECTS:map_obj>)
+
 target_include_directories(web_obj PRIVATE ${inc_src})
+target_link_libraries(web PRIVATE pthread)
 install(TARGETS web)
 add_dependencies(web fileio)
 add_dependencies(web soc)
@@ -226,6 +228,6 @@ add_dependencies(web tritree)
 
 add_executable(web_tests webserver/tests/webserver_test.c webserver/tests/munit.c)
 target_include_directories(web_tests PRIVATE ${inc_src})
-target_link_libraries(web_tests PRIVATE web req fileio toml soc_ssl soc bstring tritree)
+target_link_libraries(web_tests PRIVATE web req fileio toml soc_ssl soc bstring tritree pthread)
 add_test(NAME web_tests
          COMMAND web_tests)

@@ -5,6 +5,7 @@
 #include "soc.h"
 #include "ssl.h"
 #include "tritree.h"
+#include <pthread.h>
 
 #undef CONFIG_FOLDER
 #define CONFIG_FOLDER "/etc/aweb/"

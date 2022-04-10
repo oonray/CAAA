@@ -1,6 +1,8 @@
 #include "../src/webserver.h"
 #include "munit.h"
 #include "request.h"
+#include <pthread.h>
+#include <unistd.h>
 
 MunitResult test_new(const MunitParameter params[],
                      void *user_data_or_fixture) {
@@ -22,14 +24,24 @@ error:
   return NULL;
 }
 
+void *thread01(void *data) { Webserver_Run((Webserver *)data); }
+void *thread02(void *data) { system(bdata((bstring)data)); }
+
 MunitResult test_new_url(const MunitParameter params[],
                          void *user_data_or_fixture) {
+  pthread_t server, client;
+
   Webserver *srv = Webserver_New(SOCKFD, NULL, 31337);
   check(srv != NULL, "Could not Create Server");
 
   Webserver_AddRoute(srv, bfromcstr("/"), handle_home);
-  Webserver_Run(srv);
 
+  pthread_create(&server, NULL, thread01, (void *)srv);
+  pthread_create(
+      &client, NULL, thread02,
+      (void *)bfromcstr("curl -ik http://localhost:31337 --output -"));
+
+  pthread_join(client, NULL);
   Webserver_Destroy(srv);
   return MUNIT_OK;
 error:

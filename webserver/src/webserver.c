@@ -76,6 +76,7 @@ int Webserver_Run(Webserver *srv) {
       exit(0);
     }
   }
+
   return 0;
 error:
   return -1;
