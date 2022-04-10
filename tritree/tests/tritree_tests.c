@@ -1,7 +1,7 @@
-#include "../src/dbg.h"
-#include "../src/tritree.h"
 #include "bstrlib.h"
+#include "dbg.h"
 #include "munit.h"
+#include "tritree.h"
 
 TriTree *tree;
 

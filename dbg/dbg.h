@@ -5,28 +5,31 @@
 #ifndef _DBG_H
 #define _DBG_H
 
+#include "colors.h"
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
 
-#define get_errno() (errno == 0 ? "None" : strerror(errno))
+// COLOR [STATUS] END [file | func | line] MESSAGE \n
 
-#define log_msg(T, M, OUT, ...)                                                \
-  fprintf(OUT, "\e[35m[" T "]\e[0m [file: %s | func %s | line: %d]: " M "\n",  \
-          __FILE__, __func__, __LINE__, ##__VA_ARGS__)
-#define log_err(T, M, OUT, ...)                                                \
-  fprintf(OUT,                                                                 \
-          "\e[31m[" T "]\e[0m [file: %s | func %s | line: %d] [errno %s]: " M  \
-          "\n",                                                                \
-          __FILE__, __func__, __LINE__, get_errno(), ##__VA_ARGS__)
+#define OUT_STD (stdout)
+#define OUT_ERR (stderr)
 
-#define log_info(M, ...) log_msg("INFO", M, stdin, ##__VA_ARGS__)
+#define DBG_FORMAT(SS, C, S, M)                                                \
+  "" SS " " C "[" S "]" KNRM " [file: %s | func %s | line %d] " M "\n"
+
+#define dbg_get_errno()                                                        \
+  (errno == 0 ? bfromcstr("None") : bfromcstr(strerror(errno)))
+
+#define dbg_log(O, SS, C, S, M, ...)                                           \
+  fprintf(O, DBG_FORMAT(SS, C, S, M), __FILE__, __func__, __LINE__,            \
+          ##__VA_ARGS__);
+
+#define log_info(M, ...)                                                       \
+  { dbg_log(OUT_STD, KNOK, KMAG, "INFO", M, ##__VA_ARGS__); }
+
 #define log_error(M, ...)                                                      \
-  { log_err("ERROR", M, stderr, ##__VA_ARGS__); }
-
-#define log_info_f(M, ...) log_msg("INFO", M, LOGFILE, ##__VA_ARGS__)
-#define log_error_f(M, ...)                                                    \
-  { log_err("ERROR", M, LOGFILE, ##__VA_ARGS__); }
+  { dbg_log(OUT_ERR, KWAR, KRED, "ERROR", M, ##__VA_ARGS__); }
 
 #define check(A, M, ...)                                                       \
   {                                                                            \
