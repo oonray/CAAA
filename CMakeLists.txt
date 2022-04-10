@@ -205,8 +205,8 @@ add_dependencies(soc_ssl fileio)
 add_executable(soc_ssl_tests sockets/tests/ssl_tests.c sockets/tests/munit.c)
 target_include_directories(soc_ssl_tests BEFORE PRIVATE ${inc_src})
 target_link_libraries(soc_ssl_tests PRIVATE fileio soc_ssl bstring toml pthread)
-add_test(NAME soc_ssl_tests
-         COMMAND soc_ssl_tests)
+#add_test(NAME soc_ssl_tests
+#         COMMAND soc_ssl_tests)
 
 #web
 add_library(web_obj OBJECT webserver/src/webserver.c webserver/src/request.c)
