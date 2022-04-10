@@ -2,13 +2,16 @@
 #include "munit.h"
 
 static struct tagbstring description = bsStatic("Test Data Argument Parser");
+static struct tagbstring name = bsStatic("test_parser");
 
 int argc = 6;
 char *args[6] = {"testparser", "-i", "5", "-s", "-ss", "hello"};
 
 ArgumentParser *argparser;
 
-static void *setup() { argparser = Argparse_New_Argument_Parser(&description); }
+static void *setup() {
+  argparser = Argparse_New_Argument_Parser(&description, &name);
+}
 
 void teardown() {}
 
@@ -77,7 +80,8 @@ MunitResult test_print_all(const MunitParameter params[],
   check(argparser->args_t != NULL, "Could not create data");
   check(argparser->args_n != NULL, "Could not create data");
   test_add_arg(params, user_data_or_fixture);
-  TriTree_Traverse(argparser->args_n, PrintArgs, NULL);
+
+  Argparse_Print_Help(argparser);
 
   return MUNIT_OK;
 error:

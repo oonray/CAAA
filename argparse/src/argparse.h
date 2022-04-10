@@ -6,7 +6,6 @@
 #include <stdlib.h>
 
 #include "bstrlib.h"
-#include "colors.h"
 #include "dbg.h"
 #include "tritree.h"
 
@@ -28,7 +27,7 @@ typedef struct ArgumentParser {
 
 void PrintArgs(void *value, void *data);
 
-ArgumentParser *Argparse_New_Argument_Parser(bstring description);
+ArgumentParser *Argparse_New_Argument_Parser(bstring description, bstring name);
 Argument *Argument_New(bstring type, bstring token, bstring name, bstring def,
                        bstring help);
 

@@ -2,15 +2,17 @@
 
 void PrintArgs(void *value, void *data) {
   Argument *arg = (Argument *)value;
-  printf("\n\t%s\t%s\t[default]%s\t%s\t\n", bdata(arg->token), bdata(arg->name),
-         bdata(arg->def), bdata(arg->help));
+  printf("\t%s%s%s\t%s\t\t%s[default] %s%s\t\t%s\n\r", KGRN, bdata(arg->token),
+         KNRM, bdata(arg->name), KMAG, KNRM, bdata(arg->def), bdata(arg->help));
 }
 
-ArgumentParser *Argparse_New_Argument_Parser(bstring description) {
+ArgumentParser *Argparse_New_Argument_Parser(bstring description,
+                                             bstring name) {
   ArgumentParser *args = (ArgumentParser *)calloc(1, sizeof(ArgumentParser));
   check(args != NULL, "Could not Create ArgumentParser");
 
   args->description = description;
+  args->progname = name;
 
   Argparse_Add_Bool(args, "-h", "help", "false", "print help");
 
@@ -109,9 +111,9 @@ int Argparse_Parse(ArgumentParser *parser, int argc, char *argv[]) {
         Argparse_Print_Help(parser);
       }
 
-      Argument *arg = Argparse_Find(parser->args_t, token);
+      Argument *arg = Argparse_Find(parser, bdata(token));
       if (arg != NULL) {
-        if (arg->type != "bool") {
+        if (bstrcmp(arg->type, bfromcstr("bool")) == 0) {
           ++i;
           arg->value = bfromcstr(argv[i]);
         } else {
@@ -133,7 +135,7 @@ Argument *Argparse_Find(ArgumentParser *args, char *token) {
 }
 
 void Argparse_Print_Help(ArgumentParser *args) {
+  printf("\n%s %s %s %s [flag] %s [pos_args]%s:\n", KWAR, KGRN,
+         bdata(args->progname), KYEL, KBLU, KNRM);
   TriTree_Traverse(args->args_t, PrintArgs, NULL);
-  Argparse_Destroy(args);
-  exit(0);
 }
