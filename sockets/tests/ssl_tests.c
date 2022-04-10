@@ -80,8 +80,8 @@ error:
 
 MunitResult test_new(const MunitParameter params[],
                      void *user_data_or_fixture) {
-  AsocSSL *srv =
-      AsocSSL_New(AF_INET, SOCK_STREAM, 30000, bfromcstr("0.0.0.0"), SERVER);
+  AsocSSL *srv = AsocSSL_New(AF_INET, SOCK_STREAM, 30000, bfromcstr("0.0.0.0"),
+                             SERVER, NULL);
   check(srv != NULL, "Failed to create server");
   return MUNIT_OK;
 error:
@@ -90,8 +90,8 @@ error:
 
 MunitResult test_bind(const MunitParameter params[],
                       void *user_data_or_fixture) {
-  AsocSSL *srv =
-      AsocSSL_New(AF_INET, SOCK_STREAM, PORT, bfromcstr("0.0.0.0"), SERVER);
+  AsocSSL *srv = AsocSSL_New(AF_INET, SOCK_STREAM, PORT, bfromcstr("0.0.0.0"),
+                             SERVER, NULL);
   check(srv != NULL, "Failed to create server");
 
   check(AsocBind(srv->as) >= 0, "Could not bind to 0.0.0.0:%d", PORT);
@@ -102,8 +102,8 @@ error:
 
 MunitResult test_listen(const MunitParameter params[],
                         void *user_data_or_fixture) {
-  AsocSSL *srv =
-      AsocSSL_New(AF_INET, SOCK_STREAM, PORT + 1, bfromcstr("0.0.0.0"), SERVER);
+  AsocSSL *srv = AsocSSL_New(AF_INET, SOCK_STREAM, PORT + 1,
+                             bfromcstr("0.0.0.0"), SERVER, NULL);
 
   check(srv != NULL, "Failed to create server");
 
@@ -142,8 +142,8 @@ MunitResult test_accept(const MunitParameter params[],
                         void *user_data_or_fixture) {
 
   pthread_t server_t, client_t;
-  AsocSSL *srv =
-      AsocSSL_New(AF_INET, SOCK_STREAM, PORT + 1, bfromcstr("0.0.0.0"), SERVER);
+  AsocSSL *srv = AsocSSL_New(AF_INET, SOCK_STREAM, PORT + 1,
+                             bfromcstr("0.0.0.0"), SERVER, NULL);
 
   check(srv != NULL, "Failed to create server");
   log_info("Trying %s:%s", bdata(srv->as->host), bdata(srv->as->port));
@@ -169,12 +169,12 @@ error:
 
 MunitResult test_send_recieve(const MunitParameter params[],
                               void *user_data_or_fixture) {
-  AsocSSL *srv =
-      AsocSSL_New(AF_INET, SOCK_STREAM, PORT + 2, bfromcstr("0.0.0.0"), SERVER);
+  AsocSSL *srv = AsocSSL_New(AF_INET, SOCK_STREAM, PORT + 2,
+                             bfromcstr("0.0.0.0"), SERVER, NULL);
   check(srv != NULL, "Failed to create server");
 
-  AsocSSL *client =
-      AsocSSL_New(AF_INET, SOCK_STREAM, PORT + 2, bfromcstr("0.0.0.0"), CLIENT);
+  AsocSSL *client = AsocSSL_New(AF_INET, SOCK_STREAM, PORT + 2,
+                                bfromcstr("0.0.0.0"), CLIENT, NULL);
   check(client != NULL, "Failed to create client");
 
   return MUNIT_OK;

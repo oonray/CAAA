@@ -6,7 +6,7 @@
 
 MunitResult test_new(const MunitParameter params[],
                      void *user_data_or_fixture) {
-  Webserver *srv = Webserver_New(HTTP, NULL, 0, NULL);
+  Webserver *srv = Webserver_New(HTTP, NULL, 0, NULL, NULL);
   check(srv != NULL, "Could not Create Server");
 
   Webserver_Destroy(srv);
@@ -31,7 +31,7 @@ MunitResult test_new_url(const MunitParameter params[],
                          void *user_data_or_fixture) {
   pthread_t server, client;
 
-  Webserver *srv = Webserver_New(SOCKFD, NULL, 31337, NULL);
+  Webserver *srv = Webserver_New(SOCKFD, NULL, 31337, NULL, NULL);
   check(srv != NULL, "Could not Create Server");
 
   Webserver_AddRoute(srv, bfromcstr("/"), handle_home);

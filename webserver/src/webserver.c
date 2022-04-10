@@ -6,7 +6,8 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 
-Webserver *Webserver_New(int type, TriTree *urls, int port, bstring host) {
+Webserver *Webserver_New(int type, TriTree *urls, int port, bstring host,
+                         AsocSSLConfig *conf) {
   Webserver *srv = calloc(1, sizeof(Webserver));
   check(srv != NULL, "could not allocate server");
 
@@ -20,7 +21,8 @@ Webserver *Webserver_New(int type, TriTree *urls, int port, bstring host) {
     srv->urls = urls;
 
   if (srv->type == SSLFD) {
-    srv->sock.https = AsocSSL_New(AF_INET, SOCK_STREAM, web_port, hst, SERVER);
+    srv->sock.https =
+        AsocSSL_New(AF_INET, SOCK_STREAM, web_port, hst, SERVER, conf);
     check(srv->sock.https != NULL, "Socke error");
   }
 

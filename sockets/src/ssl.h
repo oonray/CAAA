@@ -54,7 +54,8 @@ typedef struct AsocSSL {
   SSL *ssl;
 } AsocSSL;
 
-AsocSSL *AsocSSL_New(int proto, int type, int port, bstring ip, int stype);
+AsocSSL *AsocSSL_New(int proto, int type, int port, bstring ip, int stype,
+                     void *conf);
 void AsocSSL_Destroy(AsocSSL *ssl);
 
 void AsocSSL_Init();

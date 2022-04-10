@@ -84,7 +84,8 @@ void AsocSSL_deInit() {
   EVP_cleanup();
 }
 
-AsocSSL *AsocSSL_New(int proto, int type, int port, bstring ip, int stype) {
+AsocSSL *AsocSSL_New(int proto, int type, int port, bstring ip, int stype,
+                     void *conf) {
   AsocSSL *asoc_ssl = calloc(1, sizeof(AsocSSL));
   check(asoc_ssl != NULL, "Could not Create socket");
 
@@ -98,7 +99,9 @@ AsocSSL *AsocSSL_New(int proto, int type, int port, bstring ip, int stype) {
   check(asoc_ssl->as->port != NULL, "Error Creating socket, port is NULL");
 
   if (asoc_ssl->type == SERVER) {
-    asoc_ssl->config = AsocSSLConfig_New(bfromcstr(CONFIG_FOLDER));
+    asoc_ssl->config = conf == NULL
+                           ? AsocSSLConfig_New(bfromcstr(CONFIG_FOLDER))
+                           : (AsocSSLConfig *)conf;
     check(asoc_ssl->config->conf_data != NULL, "Could not Create config");
 
     asoc_ssl->ctx = SSL_CTX_new(TLS_server_method());
@@ -119,7 +122,8 @@ AsocSSL *AsocSSL_New(int proto, int type, int port, bstring ip, int stype) {
 
   if (asoc_ssl->type == CLIENT) {
     asoc_ssl->ctx = SSL_CTX_new(TLS_client_method());
-    asoc_ssl->client = AsocSSLClientConfig_New();
+    asoc_ssl->client =
+        conf == NULL ? AsocSSLClientConfig_New() : (AsocSSLClientConfig *)conf;
   }
 
   asoc_ssl->as->ssl = asoc_ssl->ssl;
