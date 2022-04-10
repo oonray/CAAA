@@ -64,7 +64,7 @@ jobs:
       - run: make
         working-directory: ./build
 
-      - run: openssl -help
+      - run: openssl help
         working-directory: ./build
 
       - run: sock_ssl_tests
