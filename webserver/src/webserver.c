@@ -6,11 +6,12 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 
-Webserver *Webserver_New(int type, TriTree *urls, int port) {
+Webserver *Webserver_New(int type, TriTree *urls, int port, bstring host) {
   Webserver *srv = calloc(1, sizeof(Webserver));
   check(srv != NULL, "could not allocate server");
 
   int web_port = (port == 0 ? (type == SSLFD ? 445 : 80) : port);
+  bstring hst = (host == NULL ? bfromcstr("0.0.0.0") : host);
 
   srv->terminate = false;
   srv->type = type;
@@ -19,14 +20,12 @@ Webserver *Webserver_New(int type, TriTree *urls, int port) {
     srv->urls = urls;
 
   if (srv->type == SSLFD) {
-    srv->sock.https = AsocSSL_New(AF_INET, SOCK_STREAM, web_port,
-                                  bfromcstr("0.0.0.0"), SERVER);
+    srv->sock.https = AsocSSL_New(AF_INET, SOCK_STREAM, web_port, hst, SERVER);
     check(srv->sock.https != NULL, "Socke error");
   }
 
   if (srv->type == SOCKFD) {
-    srv->sock.http =
-        Asoc_New(AF_INET, SOCK_STREAM, web_port, bfromcstr("0.0.0.0"));
+    srv->sock.http = Asoc_New(AF_INET, SOCK_STREAM, web_port, hst, 0);
     check(srv->sock.http != NULL, "Socket error");
   }
 
@@ -63,17 +62,23 @@ int Webserver_Run(Webserver *srv) {
   check(AsocListen(target, 0) == 0, "Could not listen");
 
   while (!srv->terminate) {
-    Asoc *client = AsocAccept(target);
+    void *client;
+    if (srv->type == HTTPS)
+      client = AsocSSL_Accept(srv->sock.https);
+    if (srv->type == HTTP)
+      client = AsocAccept(target, srv->type);
+
     check(client != NULL, "Could not accept connection from peer");
 
     int i = fork();
     if (i == 0) {
-      if (srv->type == HTTPS)
-        AsocSSL_doSSL(srv->sock.https);
-
-      Webserver_Route(srv->urls, client); // peer);
-      Asoc_Destroy(client);
-      exit(0);
+      if (srv->type == HTTPS) {
+        Webserver_Route(srv->urls, ((AsocSSL *)client)->as); // peer);
+        AsocSSL_Destroy((AsocSSL *)client);
+      } else {
+        Webserver_Route(srv->urls, ((Asoc *)client)); // peer);
+        Asoc_Destroy((Asoc *)client);
+      }
     }
   }
 

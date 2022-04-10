@@ -25,7 +25,7 @@ typedef struct Webserver {
   } sock;
 } Webserver;
 
-Webserver *Webserver_New(int type, TriTree *urls, int port);
+Webserver *Webserver_New(int type, TriTree *urls, int port, bstring host);
 void Webserver_Destroy(Webserver *srv);
 
 int Webserver_Run(Webserver *srv);

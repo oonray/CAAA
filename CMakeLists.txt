@@ -7,7 +7,7 @@ enable_testing()
 set(CPACK_PACKAGE_VENDOR "oonray")
 set(CPACK_PACKAGE_CONTACT "alexanderbjornsrud@gmail.com")
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER "oonray")
-set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LISENCE")
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
 set(CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
 set(CPACK_DEBIAN_FILE_NAME DEB-DEFAULT)
 set(CPACK_DEB_COMPONENT_INSTALL YES)
@@ -204,7 +204,7 @@ add_dependencies(soc_ssl fileio)
 
 add_executable(soc_ssl_tests sockets/tests/ssl_tests.c sockets/tests/munit.c)
 target_include_directories(soc_ssl_tests BEFORE PRIVATE ${inc_src})
-target_link_libraries(soc_ssl_tests PRIVATE fileio soc_ssl bstring toml)
+target_link_libraries(soc_ssl_tests PRIVATE fileio soc_ssl bstring toml pthread)
 add_test(NAME soc_ssl_tests
          COMMAND soc_ssl_tests)
 

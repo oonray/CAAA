@@ -1,9 +1,11 @@
 #include "munit.h"
 #include "soc.h"
 
+#define PORT 32337
+
 MunitResult test_new(const MunitParameter params[],
                      void *user_data_or_fixture) {
-  Asoc *srv = Asoc_New(AF_INET, SOCK_STREAM, 31337, bfromcstr("0.0.0.0"));
+  Asoc *srv = Asoc_New(AF_INET, SOCK_STREAM, PORT, bfromcstr("0.0.0.0"), 0);
   check(srv != NULL, "Failed to create server");
   Asoc_Destroy(srv);
   return MUNIT_OK;
@@ -13,7 +15,7 @@ error:
 
 MunitResult test_bind(const MunitParameter params[],
                       void *user_data_or_fixture) {
-  Asoc *srv = Asoc_New(AF_INET, SOCK_STREAM, 31337, bfromcstr("0.0.0.0"));
+  Asoc *srv = Asoc_New(AF_INET, SOCK_STREAM, PORT, bfromcstr("0.0.0.0"), 0);
   check(srv != NULL, "Failed to create server");
 
   check(AsocBind(srv) >= 0, "Could not bind to 0.0.0.0:31337");
@@ -25,7 +27,7 @@ error:
 
 MunitResult test_listen(const MunitParameter params[],
                         void *user_data_or_fixture) {
-  Asoc *srv = Asoc_New(AF_INET, SOCK_STREAM, 31337, bfromcstr("0.0.0.0"));
+  Asoc *srv = Asoc_New(AF_INET, SOCK_STREAM, PORT + 1, bfromcstr("0.0.0.0"), 0);
   check(srv != NULL, "Failed to create server");
 
   check(AsocBind(srv) >= 0, "Could not bind to 0.0.0.0:31337");
@@ -38,10 +40,11 @@ error:
 
 MunitResult test_accept(const MunitParameter params[],
                         void *user_data_or_fixture) {
-  Asoc *srv = Asoc_New(AF_INET, SOCK_STREAM, 31337, bfromcstr("0.0.0.0"));
+  Asoc *srv = Asoc_New(AF_INET, SOCK_STREAM, PORT + 2, bfromcstr("0.0.0.0"), 0);
   check(srv != NULL, "Failed to create server");
 
-  Asoc *client = Asoc_New(AF_INET, SOCK_STREAM, 31337, bfromcstr("127.0.0.1"));
+  Asoc *client =
+      Asoc_New(AF_INET, SOCK_STREAM, PORT + 2, bfromcstr("127.0.0.1"), 0);
   check(client != NULL, "Failed to create client");
 
   check(AsocBind(srv) >= 0, "Could not bind to 0.0.0.0:31337");
@@ -50,7 +53,7 @@ MunitResult test_accept(const MunitParameter params[],
   log_info("Listening on 0.0.0.0:31337");
   check(AsocConnect(client) >= 0, "could not connect to localhost:31337");
 
-  Asoc *peer = AsocAccept(srv);
+  Asoc *peer = AsocAccept(srv, 0);
   check(peer != NULL, "Did not accept connection");
   log_info("Connection from %s:%d", inet_ntoa(peer->addr.sin_addr),
            peer->addr.sin_port);

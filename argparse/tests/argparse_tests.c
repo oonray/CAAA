@@ -12,7 +12,8 @@ static void *setup() { argparser = Argparse_New_Argument_Parser(&description); }
 
 void teardown() {}
 
-MunitResult test_new(MunitParameter params[], void *user_data_or_fixture) {
+MunitResult test_new(const MunitParameter params[],
+                     void *user_data_or_fixture) {
   check(user_data_or_fixture != NULL, "Could not create data");
 
   return MUNIT_OK;
@@ -20,7 +21,8 @@ error:
   return MUNIT_FAIL;
 }
 
-MunitResult test_add_arg(MunitParameter params[], void *user_data_or_fixture) {
+MunitResult test_add_arg(const MunitParameter params[],
+                         void *user_data_or_fixture) {
   check(argparser != NULL, "Could not create data");
   Argparse_Add_Int(argparser, "-i", "data1", "", "The 1 data segment");
   Argparse_Add_Bool(argparser, "-s", "sum", "", "Wether to sum the data");
@@ -32,7 +34,8 @@ error:
   return MUNIT_FAIL;
 }
 
-MunitResult test_parse(MunitParameter params[], void *user_data_or_fixture) {
+MunitResult test_parse(const MunitParameter params[],
+                       void *user_data_or_fixture) {
   check(argparser != NULL, "Could not create data");
   test_add_arg(params, user_data_or_fixture);
   Argparse_Parse(argparser, argc, args);
@@ -42,9 +45,11 @@ error:
   return MUNIT_FAIL;
 }
 
-MunitResult test_get(MunitParameter params[], void *user_data_or_fixture) {
+MunitResult test_get(const MunitParameter params[],
+                     void *user_data_or_fixture) {
   check(argparser != NULL, "Could not create data");
   test_add_arg(params, user_data_or_fixture);
+
   Argparse_Parse(argparser, argc, args);
 
   Argument *data1 = Argparse_Get(argparser, "data1");
@@ -67,7 +72,7 @@ error:
   return MUNIT_FAIL;
 }
 
-MunitResult test_print_all(MunitParameter params[],
+MunitResult test_print_all(const MunitParameter params[],
                            void *user_data_or_fixture) {
   check(argparser->args_t != NULL, "Could not create data");
   check(argparser->args_n != NULL, "Could not create data");

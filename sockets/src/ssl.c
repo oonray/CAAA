@@ -89,10 +89,13 @@ AsocSSL *AsocSSL_New(int proto, int type, int port, bstring ip, int stype) {
   check(asoc_ssl != NULL, "Could not Create socket");
 
   asoc_ssl->type = stype;
-
   AsocSSL_Init();
 
-  asoc_ssl->as = Asoc_New(proto, type, port, ip);
+  asoc_ssl->as = Asoc_New(proto, type, port, ip, SSLFD);
+  check(asoc_ssl->as != NULL, "Could not create socket");
+
+  check(asoc_ssl->as->host != NULL, "Error Creating socket, host is NULL");
+  check(asoc_ssl->as->port != NULL, "Error Creating socket, port is NULL");
 
   if (asoc_ssl->type == SERVER) {
     asoc_ssl->config = AsocSSLConfig_New(bfromcstr(CONFIG_FOLDER));
@@ -101,13 +104,13 @@ AsocSSL *AsocSSL_New(int proto, int type, int port, bstring ip, int stype) {
     asoc_ssl->ctx = SSL_CTX_new(TLS_server_method());
     check(asoc_ssl->ctx != NULL, "SSL CTX is null");
 
-    log_info("Using %s", bdata(asoc_ssl->config->cert));
+    log_info("Using cert %s", bdata(asoc_ssl->config->cert));
     check(SSL_CTX_use_certificate_file(asoc_ssl->ctx,
                                        bdata(asoc_ssl->config->cert),
                                        SSL_FILETYPE_PEM) >= 0,
           "Could not load cert");
 
-    log_info("Using %s", bdata(asoc_ssl->config->pki));
+    log_info("Using key %s", bdata(asoc_ssl->config->pki));
     check(SSL_CTX_use_PrivateKey_file(asoc_ssl->ctx,
                                       bdata(asoc_ssl->config->pki),
                                       SSL_FILETYPE_PEM) >= 0,
@@ -120,7 +123,6 @@ AsocSSL *AsocSSL_New(int proto, int type, int port, bstring ip, int stype) {
   }
 
   asoc_ssl->as->ssl = asoc_ssl->ssl;
-
   return asoc_ssl;
 error:
   return NULL;
@@ -142,11 +144,30 @@ error:
   return -1;
 }
 
-int AsocSSL_doSSL(AsocSSL *srv) {
+AsocSSL *AsocSSL_Accept(AsocSSL *srv) {
+  AsocSSL *client = calloc(1, sizeof(AsocSSL));
+  check(client != NULL, "could not client allocate");
+
+  client->as = calloc(1, sizeof(Asoc));
+  check(client->as != NULL, "could not allocate socket");
+
+  socklen_t peer_len = sizeof(client->as->addr);
+  int c_soc = accept(srv->as->io->fd, (struct sockaddr *)&client->as->addr,
+                     (socklen_t *)&peer_len);
+
+  check(c_soc != 0, "Could not accept connection");
+  client->as->io = NewIoStream(c_soc, SSLFD, 1024 * 10);
+
   srv->ssl = SSL_new(srv->ctx);
-  SSL_set_fd(srv->ssl, srv->as->io->fd);
-  check(SSL_accept(srv->ssl), "Could not accept request");
-  return 0;
+  SSL_set_fd(srv->ssl, client->as->io->fd);
+
+  int accept = SSL_accept(srv->ssl);
+  check(accept > 0, "Could not accept request: fatal error : %d",
+        SSL_get_error(srv->ssl, 0));
+  check(accept != 0, "Could not accept request: %d",
+        SSL_get_error(srv->ssl, 0));
+
+  return client;
 error:
-  return -1;
+  return NULL;
 }

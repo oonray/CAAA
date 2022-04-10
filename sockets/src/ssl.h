@@ -60,7 +60,6 @@ void AsocSSL_Destroy(AsocSSL *ssl);
 void AsocSSL_Init();
 void AsocSSL_deInit();
 
-int AsocSSL_doSSL(AsocSSL *ssl);
-
+AsocSSL *AsocSSL_Accept(AsocSSL *ssl);
 int AsocSSLConnect(AsocSSL *srv);
 #endif // SSL_H_

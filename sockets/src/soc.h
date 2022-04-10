@@ -15,11 +15,11 @@ typedef struct Asoc {
 #endif
 } Asoc;
 
-Asoc *Asoc_New(int proto, int type, int port, bstring ip);
+Asoc *Asoc_New(int proto, int type, int port, bstring ip, int stype);
 void Asoc_Destroy(Asoc *srv);
 int AsocBind(Asoc *srv);
 int AsocListen(Asoc *srv, int backlog);
 int AsocConnect(Asoc *srv);
-Asoc *AsocAccept(Asoc *srv);
+Asoc *AsocAccept(Asoc *srv, int type);
 
 #endif
