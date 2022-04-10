@@ -138,4 +138,5 @@ void Argparse_Print_Help(ArgumentParser *args) {
   printf("\n%s %s %s %s [flag] %s [pos_args]%s:\n", KWAR, KGRN,
          bdata(args->progname), KYEL, KBLU, KNRM);
   TriTree_Traverse(args->args_t, PrintArgs, NULL);
+  printf("\n");
 }
