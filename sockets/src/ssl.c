@@ -93,6 +93,8 @@ AsocSSL *AsocSSL_New(int proto, int type, int port, bstring ip, int stype,
   AsocSSL_Init();
 
   asoc_ssl->as = Asoc_New(proto, type, port, ip, SSLFD);
+  asoc_ssl->as->ssl = asoc_ssl->ssl;
+
   check(asoc_ssl->as != NULL, "Could not create socket");
 
   check(asoc_ssl->as->host != NULL, "Error Creating socket, host is NULL");
@@ -102,6 +104,7 @@ AsocSSL *AsocSSL_New(int proto, int type, int port, bstring ip, int stype,
     asoc_ssl->config = conf == NULL
                            ? AsocSSLConfig_New(bfromcstr(CONFIG_FOLDER))
                            : (AsocSSLConfig *)conf;
+
     check(asoc_ssl->config->conf_data != NULL, "Could not Create config");
 
     asoc_ssl->ctx = SSL_CTX_new(TLS_server_method());
@@ -163,6 +166,8 @@ AsocSSL *AsocSSL_Accept(AsocSSL *srv) {
   client->as->io = NewIoStream(c_soc, SSLFD, 1024 * 10);
 
   srv->ssl = SSL_new(srv->ctx);
+  check(srv->ssl != NULL, "Could not create SSL: %d",
+        SSL_get_error(srv->ssl, 0));
   SSL_set_fd(srv->ssl, client->as->io->fd);
 
   int accept = SSL_accept(srv->ssl);

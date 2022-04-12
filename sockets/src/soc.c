@@ -6,15 +6,8 @@ Asoc *Asoc_New(int proto, int type, int port, bstring ip, int stype) {
 
   stype = stype == 0 ? SOCKFD : stype;
 
-#ifdef HEADER_SSL_H
-  if (stype == SSLFD) {
-    srv->io = NewIoStreamSocketSSL(proto, type, 1024 * 10);
-  } else {
-    srv->io = NewIoStreamSocketSOC(proto, type, 1024 * 10);
-  }
-#else
   srv->io = NewIoStreamSocketSOC(proto, type, 1024 * 10);
-#endif
+
   check(srv->io != NULL, "Could not create io");
 
   srv->host = ip;

@@ -50,6 +50,9 @@ typedef struct ioStream {
   RingBuffer *in;
   ioReader reader;
   ioWriter writer;
+#ifdef HEADER_SSL_H
+  SSL *ssl;
+#endif
 } ioStream;
 
 ioStream *NewIoStream(int fd, int fd_t, size_t buf_t);

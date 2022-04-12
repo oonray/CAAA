@@ -5,11 +5,11 @@
 
 #define PORT 31338
 
-#undef CONFIG_FOLDER
-#define CONFIG_FOLDER "s_tests/"
+struct tagbstring conf_folder = bsStatic("../sockets/tests/");
+static AsocSSLConfig *conf;
 
-struct tagbstring s_client =
-    bsStatic("echo \"exit\" | openssl s_client -connect 127.0.0.1:31337");
+struct tagbstring s_client = bsStatic(
+    "echo \"exit\" | openssl s_client -quiet -brief -connect 127.0.0.1:31337");
 
 struct tagbstring s_server =
     bsStatic("openssl s_server -brief -port 31337 -cert "
@@ -41,30 +41,28 @@ error:
 
 MunitResult test_new_config(const MunitParameter params[],
                             void *user_data_or_fixture) {
-  log_info("Reading Config from %s", CONFIG_FOLDER);
-  AsocSSLConfig *conf = AsocSSLConfig_New(bfromcstr(CONFIG_FOLDER));
+  log_info("Reading Config from %s", "s_tests/");
+  AsocSSLConfig *l_conf = AsocSSLConfig_New(bfromcstr("s_tests/"));
   check(conf != NULL, "Could not create config");
+
   log_info("Config Read");
 
-  check(bstrcmp(conf->pki, bfromcstr("<path>.pem")) == 0,
-        "PKI has wrong value: %s", bdata(conf->pki));
-  check(bstrcmp(conf->cert, bfromcstr("<path>.pem")) == 0,
-        "Cert has wrong value: %s", bdata(conf->cert));
+  check(bstrcmp(l_conf->pki, bfromcstr("<path>.pem")) == 0,
+        "PKI has wrong value: %s", bdata(l_conf->pki));
+  check(bstrcmp(l_conf->cert, bfromcstr("<path>.pem")) == 0,
+        "Cert has wrong value: %s", bdata(l_conf->cert));
 
   return MUNIT_OK;
 error:
   return MUNIT_FAIL;
 }
 
-#undef CONFIG_FOLDER
-#define CONFIG_FOLDER "../sockets/tests/"
-
 MunitResult test_new_config_conf(const MunitParameter params[],
                                  void *user_data_or_fixture) {
 
-  log_info("Reading Config from %s", CONFIG_FOLDER);
+  log_info("Reading Config from %s", bdata(&conf_folder));
 
-  AsocSSLConfig *conf = AsocSSLConfig_New(bfromcstr(CONFIG_FOLDER));
+  conf = AsocSSLConfig_New(&conf_folder);
   check(conf != NULL, "Could not create config");
   log_info("Config Read");
 
@@ -80,8 +78,10 @@ error:
 
 MunitResult test_new(const MunitParameter params[],
                      void *user_data_or_fixture) {
+
+  conf = AsocSSLConfig_New(&conf_folder);
   AsocSSL *srv = AsocSSL_New(AF_INET, SOCK_STREAM, 30000, bfromcstr("0.0.0.0"),
-                             SERVER, NULL);
+                             SERVER, (void *)conf);
   check(srv != NULL, "Failed to create server");
   return MUNIT_OK;
 error:
@@ -90,8 +90,9 @@ error:
 
 MunitResult test_bind(const MunitParameter params[],
                       void *user_data_or_fixture) {
+  conf = AsocSSLConfig_New(&conf_folder);
   AsocSSL *srv = AsocSSL_New(AF_INET, SOCK_STREAM, PORT, bfromcstr("0.0.0.0"),
-                             SERVER, NULL);
+                             SERVER, (void *)conf);
   check(srv != NULL, "Failed to create server");
 
   check(AsocBind(srv->as) >= 0, "Could not bind to 0.0.0.0:%d", PORT);
@@ -102,8 +103,9 @@ error:
 
 MunitResult test_listen(const MunitParameter params[],
                         void *user_data_or_fixture) {
+  conf = AsocSSLConfig_New(&conf_folder);
   AsocSSL *srv = AsocSSL_New(AF_INET, SOCK_STREAM, PORT + 1,
-                             bfromcstr("0.0.0.0"), SERVER, NULL);
+                             bfromcstr("0.0.0.0"), SERVER, (void *)conf);
 
   check(srv != NULL, "Failed to create server");
 
@@ -142,8 +144,9 @@ MunitResult test_accept(const MunitParameter params[],
                         void *user_data_or_fixture) {
 
   pthread_t server_t, client_t;
+  conf = AsocSSLConfig_New(&conf_folder);
   AsocSSL *srv = AsocSSL_New(AF_INET, SOCK_STREAM, PORT + 1,
-                             bfromcstr("0.0.0.0"), SERVER, NULL);
+                             bfromcstr("0.0.0.0"), SERVER, (void *)conf);
 
   check(srv != NULL, "Failed to create server");
   log_info("Trying %s:%s", bdata(srv->as->host), bdata(srv->as->port));
@@ -167,15 +170,48 @@ error:
   return MUNIT_FAIL;
 }
 
+void *thread03(void *data) {
+  AsocSSL *client = (AsocSSL *)data;
+  AsocSSLConnect(client);
+  IoStreamBuffWrite(client->as->io, bfromcstr("Hello World"));
+  IoStreamIoWrite(client->as->io);
+  return NULL;
+}
+
+void *thread04(void *data) {
+  AsocSSL *srv = (AsocSSL *)data;
+  check(srv != NULL, "Asoc is empty");
+
+  check(AsocBind(srv->as) >= 0, "Could not bind to %s:%s", bdata(srv->as->host),
+        bdata(srv->as->port));
+
+  check(AsocListen(srv->as, 0) >= 0, "Could not listen on %s:%s",
+        bdata(srv->as->host), bdata(srv->as->port));
+
+  log_info("Listening on %s:%s", bdata(srv->as->host), bdata(srv->as->port));
+  AsocSSL *peer = AsocSSL_Accept(srv);
+
+  IoStreamIoRead(peer->as->io);
+  bstring out = IoStreamBuffRead(peer->as->io);
+
+  return peer;
+error:
+  return NULL;
+}
 MunitResult test_send_recieve(const MunitParameter params[],
                               void *user_data_or_fixture) {
-  AsocSSL *srv = AsocSSL_New(AF_INET, SOCK_STREAM, PORT + 2,
-                             bfromcstr("0.0.0.0"), SERVER, NULL);
+  pthread_t server_t, client_t;
+  conf = AsocSSLConfig_New(&conf_folder);
+  AsocSSL *srv = AsocSSL_New(AF_INET, SOCK_STREAM, PORT + 3,
+                             bfromcstr("0.0.0.0"), SERVER, (void *)conf);
   check(srv != NULL, "Failed to create server");
 
-  AsocSSL *client = AsocSSL_New(AF_INET, SOCK_STREAM, PORT + 2,
+  AsocSSL *client = AsocSSL_New(AF_INET, SOCK_STREAM, PORT + 3,
                                 bfromcstr("0.0.0.0"), CLIENT, NULL);
   check(client != NULL, "Failed to create client");
+
+  pthread_create(&server_t, NULL, thread04, (void *)srv);
+  pthread_create(&client_t, NULL, thread03, (void *)client);
 
   return MUNIT_OK;
 error:
@@ -193,9 +229,8 @@ int main(int argc, char *argv[]) {
       {" test_bind", test_bind, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
       {" test_listen", test_listen, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
       {" test_accept", test_accept, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
-      /*     {" test_send_recieve", test_send_recieve, NULL, NULL,
-      MUNIT_TEST_OPTION_NONE,
-      NULL},*/
+      {" test_send_recieve", test_send_recieve, NULL, NULL,
+       MUNIT_TEST_OPTION_NONE, NULL},
 
       {NULL, NULL, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL}};
 
