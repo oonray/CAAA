@@ -1,4 +1,5 @@
 #include "../src/webserver.h"
+#include "dbg_a.h"
 #include "munit.h"
 #include "request.h"
 #include <pthread.h>
@@ -15,6 +16,8 @@ error:
   return MUNIT_FAIL;
 }
 
+Webserver *srv;
+
 Response *handle_home(Request *req) {
   Response *rsp =
       Response_New(req, bfromcstr("<pre>Hello World</pre>"), 0, NULL);
@@ -24,26 +27,50 @@ error:
   return NULL;
 }
 
-void *thread01(void *data) { Webserver_Run((Webserver *)data); }
+Response *handle_kill(Request *req) {
+  srv->terminate = true;
+  Response *rsp = Response_New(
+      req, bformat("{\"terminate\":%s}", srv->terminate ? "true" : "false"), 0,
+      NULL);
+  check(rsp != NULL, "Error creating response");
+  return rsp;
+error:
+  return NULL;
+}
+
+void *thread01(void *data) {
+  check_none(Webserver_Run((Webserver *)data) == 0, "Error with webserver");
+}
+
 void *thread02(void *data) { system(bdata((bstring)data)); }
 
 MunitResult test_new_url(const MunitParameter params[],
                          void *user_data_or_fixture) {
-  pthread_t server, client;
+  pthread_t server, client, client2;
 
-  Webserver *srv = Webserver_New(SOCKFD, NULL, 31337, NULL, NULL);
+  int port = 31320;
+
+  srv = Webserver_New(SOCKFD, NULL, port, NULL, NULL);
   check(srv != NULL, "Could not Create Server");
+  log_info("Server Created");
 
   Webserver_AddRoute(srv, bfromcstr("/"), handle_home);
+  Webserver_AddRoute(srv, bfromcstr("/kill"), handle_kill);
+  log_info("Routes added");
 
   pthread_create(&server, NULL, thread01, (void *)srv);
 
   pthread_create(
       &client, NULL, thread02,
-      (void *)bfromcstr("curl -ik http://localhost:31337 --output -"));
+      (void *)bformat("curl -ik http://localhost:%d/ --output -", port));
 
-  pthread_join(client, NULL);
+  pthread_create(
+      &client2, NULL, thread02,
+      (void *)bformat("curl -ik http://localhost:%d/kill --output -", port));
+
+  pthread_join(server, NULL);
   Webserver_Destroy(srv);
+
   return MUNIT_OK;
 error:
   return MUNIT_FAIL;

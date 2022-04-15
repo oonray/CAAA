@@ -30,7 +30,7 @@ enum Descriptors { INN, OUT, ERR };
 static struct tagbstring NL = bsStatic("\n");
 static struct tagbstring CRLF = bsStatic("\n\r");
 
-// file
+// regular open file
 typedef size_t (*fileReader)(int, void *, size_t);
 typedef size_t (*fileWriter)(int, const void *, size_t);
 
@@ -57,6 +57,7 @@ ioStream *NewIoStream(int fd, int fd_t, size_t buf_t);
 ioStream *NewIoStreamFile(bstring path, int flags, int buf_t);
 ioStream *NewIoStreamSocket(int inet, int type, int FD, int buf_t);
 
+ioStream *NewIoStreamFromFILE(FILE *fp, int buf_t);
 ioStream *NewIoStreamSocketSOC(int inet, int type, int buf_t, void *ssl);
 
 void DestroyIoStream(ioStream *io);

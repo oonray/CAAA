@@ -20,10 +20,9 @@ typedef struct Webserver {
   TriTree *urls;
   bool terminate;
   int type;
-  union sock {
-    Asoc *http;
-    AsocSSL *https;
-  } sock;
+  void *sock;
+  int port;
+  bstring host;
 } Webserver;
 
 Webserver *Webserver_New(int type, TriTree *urls, int port, bstring host,

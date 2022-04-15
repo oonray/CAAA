@@ -1,8 +1,11 @@
 #include "fileio.h"
+#include <stddef.h>
 
 ioStream *NewIoStream(int fd, int fd_t, size_t buf_t) {
   ioStream *out = calloc(1, sizeof(ioStream));
   check(out != NULL, "Could not create IO Stream");
+
+  size_t b_size = buf_t == 0 ? 1024 * 5 : buf_t;
 
   out->fd = fd;
   out->fd_t = fd_t;
@@ -24,7 +27,7 @@ ioStream *NewIoStream(int fd, int fd_t, size_t buf_t) {
     break;
   }
 
-  out->in = RingBuffer_New(buf_t);
+  out->in = RingBuffer_New(b_size);
   check(out->in != NULL, "Could not create in stream");
 
   return out;
@@ -37,6 +40,14 @@ ioStream *NewIoStreamFile(bstring path, int flags, int buf_t) {
   int fd = open(pt, flags);
   check(fd >= 0, "Could not open file %s", bdata(path));
   return NewIoStream(fd, FILEFD, buf_t);
+error:
+  return NULL;
+}
+
+ioStream *NewIoStreamFromFILE(FILE *fp, int buf_t) {
+  int fd = fileno(fp);
+  ioStream *stream = NewIoStream(fd, FILEFD, buf_t);
+  return stream;
 error:
   return NULL;
 }
@@ -104,7 +115,7 @@ int IoStreamIoRead(ioStream *str) {
   check(rc != 0, "Failed to read form %s",
         str->fd_t == SOCKFD ? "Socket" : "File");
 
-  RingBuffer_Commit_Read(str->in, rc);
+  RingBuffer_Commit_Write(str->in, rc);
   return rc;
 error:
   return -1;

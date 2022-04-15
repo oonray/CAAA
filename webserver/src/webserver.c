@@ -11,8 +11,8 @@ Webserver *Webserver_New(int type, TriTree *urls, int port, bstring host,
   Webserver *srv = calloc(1, sizeof(Webserver));
   check(srv != NULL, "could not allocate server");
 
-  int web_port = (port == 0 ? (type == SSLFD ? 445 : 80) : port);
-  bstring hst = (host == NULL ? bfromcstr("0.0.0.0") : host);
+  srv->port = (port == 0 ? (type == SSLFD ? 445 : 80) : port);
+  srv->host = (host == NULL ? bfromcstr("0.0.0.0") : host);
 
   srv->terminate = false;
   srv->type = type;
@@ -21,15 +21,15 @@ Webserver *Webserver_New(int type, TriTree *urls, int port, bstring host,
     srv->urls = urls;
 
   if (srv->type == SSLFD) {
-    srv->sock.https =
-        AsocSSL_New(AF_INET, SOCK_STREAM, web_port, hst, SERVER, conf);
-    check(srv->sock.https != NULL, "Socke error");
+    srv->sock =
+        AsocSSL_New(AF_INET, SOCK_STREAM, srv->port, srv->host, SERVER, conf);
   }
 
   if (srv->type == SOCKFD) {
-    srv->sock.http = Asoc_New(AF_INET, SOCK_STREAM, web_port, hst, 0);
-    check(srv->sock.http != NULL, "Socket error");
+    srv->sock = Asoc_New(AF_INET, SOCK_STREAM, srv->port, srv->host, 0);
   }
+
+  check(srv->sock != NULL, "Socket error");
 
   return srv;
 error:
@@ -38,37 +38,35 @@ error:
 
 void Webserver_Destroy(Webserver *srv) {
   if (srv->type == SSLFD) {
-    shutdown(srv->sock.https->as->io->fd, SHUT_RDWR);
-    AsocSSL_Destroy(srv->sock.https);
+    shutdown(((AsocSSL *)srv->sock)->as->io->fd, SHUT_RDWR);
+    AsocSSL_Destroy((AsocSSL *)srv->sock);
   }
   if (srv->type == SOCKFD) {
-    shutdown(srv->sock.http->io->fd, SHUT_RDWR);
-    Asoc_Destroy(srv->sock.http);
+    shutdown(((Asoc *)srv->sock)->io->fd, SHUT_RDWR);
+    Asoc_Destroy((Asoc *)srv->sock);
   }
   TriTree_Destroy(srv->urls);
   free(srv);
 }
 
 int Webserver_Run(Webserver *srv) {
-  Asoc *target = NULL;
-
-  if (srv->type == HTTPS)
-    target = srv->sock.https->as;
-
-  if (srv->type == HTTP)
-    target = srv->sock.http;
-
-  check(target != NULL, "socket error");
-
-  check(AsocBind(target) == 0, "Could not bind");
-  check(AsocListen(target, 0) == 0, "Could not listen");
+  log_info("Running on %s://%s:%d", srv->type == HTTPS ? "https" : "http",
+           bdata(srv->host), srv->port);
+  if (srv->type == HTTPS) {
+    check(AsocBind(((AsocSSL *)srv->sock)->as) == 0, "Could not bind");
+    check(AsocListen(((AsocSSL *)srv->sock)->as, 0) == 0, "Could not listen");
+  } else {
+    check(AsocBind((Asoc *)srv->sock) == 0, "Could not bind");
+    check(AsocListen((Asoc *)srv->sock, 0) == 0, "Could not listen");
+  }
 
   while (!srv->terminate) {
-    void *client;
+    void *client = NULL;
+
     if (srv->type == HTTPS)
-      client = AsocSSL_Accept(srv->sock.https);
+      client = AsocSSL_Accept(((AsocSSL *)srv->sock)->ssl);
     if (srv->type == HTTP)
-      client = AsocAccept(target, srv->type);
+      client = AsocAccept((Asoc *)srv->sock, srv->type);
 
     check_continue(client != NULL, "Could not accept connection from peer");
 
@@ -93,6 +91,7 @@ int Webserver_Route(TriTree *urls, Asoc *peer) {
   // Read from socket
   IoStreamIoRead(peer->io);
   bstring data = IoStreamBuffRead(peer->io);
+  log_info("Recieved: %s", bdata(data));
 
   Request *req = Request_New(data);
 
