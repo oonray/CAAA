@@ -70,7 +70,7 @@ int Webserver_Run(Webserver *srv) {
     if (srv->type == HTTP)
       client = AsocAccept(target, srv->type);
 
-    check(client != NULL, "Could not accept connection from peer");
+    check_continue(client != NULL, "Could not accept connection from peer");
 
     int i = fork();
     if (i == 0) {
@@ -93,7 +93,6 @@ int Webserver_Route(TriTree *urls, Asoc *peer) {
   // Read from socket
   IoStreamIoRead(peer->io);
   bstring data = IoStreamBuffRead(peer->io);
-  log_info("%s", bdata(data));
 
   Request *req = Request_New(data);
 

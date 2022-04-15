@@ -1,6 +1,7 @@
 #ifndef WEBSERVER_H_
 #define WEBSERVER_H_
 
+#include "dbg_a.h"
 #include "request.h"
 #include "soc.h"
 #include "ssl.h"
