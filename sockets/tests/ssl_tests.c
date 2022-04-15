@@ -170,10 +170,12 @@ error:
   return MUNIT_FAIL;
 }
 
+struct tagbstring ssl_out = bsStatic("Hello World");
+
 void *thread03(void *data) {
   AsocSSL *client = (AsocSSL *)data;
   AsocSSLConnect(client);
-  IoStreamBuffWrite(client->as->io, bfromcstr("Hello World"));
+  IoStreamBuffWrite(client->as->io, &ssl_out);
   IoStreamIoWrite(client->as->io);
   return NULL;
 }
@@ -193,11 +195,13 @@ void *thread04(void *data) {
 
   IoStreamIoRead(peer->as->io);
   bstring out = IoStreamBuffRead(peer->as->io);
+  check(bstrcmp(out, &ssl_out) == 0, "Wrong data recieved");
 
   return peer;
 error:
   return NULL;
 }
+
 MunitResult test_send_recieve(const MunitParameter params[],
                               void *user_data_or_fixture) {
   pthread_t server_t, client_t;

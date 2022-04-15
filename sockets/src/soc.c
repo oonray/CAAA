@@ -6,7 +6,7 @@ Asoc *Asoc_New(int proto, int type, int port, bstring ip, int stype) {
 
   stype = stype == 0 ? SOCKFD : stype;
 
-  srv->io = NewIoStreamSocketSOC(proto, type, 1024 * 10);
+  srv->io = NewIoStreamSocketSOC(proto, type, 1024 * 10, NULL);
 
   check(srv->io != NULL, "Could not create io");
 

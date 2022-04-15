@@ -12,7 +12,7 @@ MunitResult test_new(const MunitParameter params[],
                      void *user_data_or_fixture) {
   log_info("Reading File");
   ioStream *req = NewIoStreamFile(bfromcstr("../webserver/tests/request.req"),
-                                  O_RDWR, 0644, 1024 * 10);
+                                  O_RDWR, 1024 * 10);
   check(IoStreamIoRead(req) > 0, "Could not read request");
 
   log_info("Loading Request");
@@ -55,7 +55,7 @@ error:
 MunitResult test_response(const MunitParameter params[],
                           void *user_data_or_fixture) {
   ioStream *req = NewIoStreamFile(bfromcstr("../webserver/tests/request.req"),
-                                  O_RDWR, 0644, 1024 * 10);
+                                  O_RDWR, 1024 * 10);
   check(IoStreamIoRead(req) > 0, "Could not read request");
 
   log_info("Loading Request");

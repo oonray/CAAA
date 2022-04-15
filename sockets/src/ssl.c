@@ -25,7 +25,8 @@ AsocSSLConfig *AsocSSLConfig_New(bstring folder) {
   conf->init = -1;
 
   if (IoFileStream_DirectoryExists(folder) < 0) {
-    check(IoFileStream_DirectoryCreate(folder, RIGHTS) >= 0,
+    check(IoFileStream_DirectoryCreate(folder, S_IRWXU | S_IRGRP | S_IROTH) >=
+              0,
           "Config dir could not be created");
   }
 
@@ -37,7 +38,7 @@ AsocSSLConfig *AsocSSLConfig_New(bstring folder) {
     check(fd >= 0, "Config file could not be created");
     close(fd);
     log_info("File %s Created", bdata(path));
-    stream = NewIoStreamFile(path, O_RDWR, RIGHTS, 10 * 1024);
+    stream = NewIoStreamFile(path, O_RDWR, 10 * 1024);
     check(IoStreamBuffWrite(stream, bfromcstr(EXAMPLE_CONTENT)) >= 0,
           "Could not write example text to buffer");
     check(IoStreamIoWrite(stream) >= 0, "Could not write to file fd");

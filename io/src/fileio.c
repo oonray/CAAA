@@ -9,18 +9,18 @@ ioStream *NewIoStream(int fd, int fd_t, size_t buf_t) {
 
   switch (fd_t) {
   case SOCKFD:
-    out->reader.sockReader = &recv;
-    out->writer.sockWriter = &send;
+    out->reader = &recv;
+    out->writer = &send;
     break;
 #ifdef HEADER_SSL_H
   case SSLFD:
-    out->reader.sockReader = &SSL_read;
-    out->writer.sockWriter = &SSL_write;
+    out->reader = &SSL_read;
+    out->writer = &SSL_write;
     break;
 #endif
   default:
-    out->reader.fileReader = &read;
-    out->writer.fileWriter = &write;
+    out->reader = &read;
+    out->writer = &write;
     break;
   }
 
@@ -32,10 +32,10 @@ error:
   return NULL;
 }
 
-ioStream *NewIoStreamFile(bstring path, int flags, int rights, int buf_t) {
+ioStream *NewIoStreamFile(bstring path, int flags, int buf_t) {
   const char *pt = bdata(path);
-  int fd = open(pt, flags, rights);
-  check(fd >= 0, "Could not open file");
+  int fd = open(pt, flags);
+  check(fd >= 0, "Could not open file %s", bdata(path));
   return NewIoStream(fd, FILEFD, buf_t);
 error:
   return NULL;
@@ -49,8 +49,11 @@ error:
   return NULL;
 }
 
-ioStream *NewIoStreamSocketSOC(int inet, int type, int buf_t) {
-  return NewIoStreamSocket(inet, type, SOCKFD, buf_t);
+ioStream *NewIoStreamSocketSOC(int inet, int type, int buf_t, void *ssl) {
+  ioStream *stream = NewIoStreamSocket(inet, type, SOCKFD, buf_t);
+  if (stream != NULL)
+    stream->ssl = ssl;
+  return stream;
 }
 
 #ifdef HEADER_SSL_H
@@ -79,18 +82,23 @@ int IoStreamIoRead(ioStream *str) {
   }
 
   if (str->fd_t == SOCKFD) {
-    rc = str->reader.sockReader(str->fd, RingBuffer_Starts_At(str->in),
-                                RingBuffer_Avaliable_Space(str->in), 0);
+    sockReader r = (sockReader)str->reader;
+    rc = (*r)(str->fd, RingBuffer_Starts_At(str->in),
+              RingBuffer_Avaliable_Space(str->in), 0);
   }
+
 #ifdef HEADER_SSL_H
-  else if (str->fd_t == SSLFD) {
-    rc = str->reader.sslSocketReader(str->ssl, RingBuffer_Starts_At(str->in),
-                                     RingBuffer_Avaliable_Space(str->in), 0);
+  if (str->fd_t == SSLFD) {
+    sslSockReader r = (sslSockReader)str->reader;
+    rc = (*r)(str->ssl, RingBuffer_Starts_At(str->in),
+              RingBuffer_Avaliable_Space(str->in), 0);
   }
 #endif
-  else {
-    rc = str->reader.fileReader(str->fd, RingBuffer_Starts_At(str->in),
-                                RingBuffer_Avaliable_Space(str->in));
+
+  if (str->fd_t == FILEFD) {
+    fileReader r = (fileReader)str->reader;
+    rc = (*r)(str->fd, RingBuffer_Starts_At(str->in),
+              RingBuffer_Avaliable_Space(str->in));
   }
 
   check(rc != 0, "Failed to read form %s",
@@ -110,15 +118,19 @@ int IoStreamIoWrite(ioStream *str) {
         "Failed to replace new lines");
 
   if (str->fd_t == SOCKFD) {
-    rc = str->writer.sockWriter(str->fd, bdata(data), blength(data), 0);
+    sockWriter w = (sockWriter)str->writer;
+    rc = (*w)(str->fd, bdata(data), blength(data), 0);
   }
+
 #ifdef HEADER_SSL_H
-  else if (str->fd_t == SSLFD) {
-    rc = str->reader.sslSocketWriter(str->sslfd, bdata(data), blength(data), 0);
+  if (str->fd_t == SSLFD) {
+    sslSockWriter w = (sslSockWriter)str->writer;
+    rc = (*w)(str->sslfd, bdata(data), blength(data), 0);
   }
 #endif
-  else {
-    rc = str->writer.fileWriter(str->fd, bdata(data), blength(data));
+  if (str->fd_t == FILEFD) {
+    fileWriter w = (fileWriter)str->writer;
+    rc = (*w)(str->fd, bdata(data), blength(data));
   }
 
   check(rc == blength(data), "Failed to write to %s",
@@ -163,8 +175,8 @@ error:
   return -1;
 }
 
-int IoFileStream_FileCreate(bstring file, int prem) {
-  int fd = open(file->data, O_CREAT | O_RDWR | O_TRUNC, prem);
+int IoFileStream_FileCreate(bstring file, mode_t mode) {
+  int fd = open(bdata(file), mode);
   check(fd > 0, "File %s could not be created", bdata(file));
   return fd;
 error:
@@ -181,8 +193,8 @@ error:
   return -1;
 }
 
-int IoFileStream_DirectoryCreate(bstring directory, int prem) {
-  int fd = mkdir(directory->data, prem);
+int IoFileStream_DirectoryCreate(bstring directory, mode_t mode) {
+  int fd = mkdir(bdata(directory), mode);
   check(fd >= 0, "Directory could not be created");
   close(fd);
   return 0;
