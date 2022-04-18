@@ -62,14 +62,14 @@ void *Webserver_Run_T(void *inp) {
     check(Webserver_Route(srv->urls, client->as) == 0,
           "Error Happened"); // peer);
 
-    SSL_shutdown(((AsocSSL *)srv->sock)->ssl);
-    AsocSSL_Destroy((AsocSSL *)client);
+    // SSL_shutdown(((AsocSSL *)srv->sock)->ssl);
+    // shutdown(client->as->io->fd, SHUT_RDWR);
+    // AsocSSL_Destroy((AsocSSL *)client);
   } else {
     Asoc *client = ((Asoc *)in->client);
-    check(Webserver_Route(srv->urls, (Asoc *)client) == 0,
-          "Error Happened"); // peer);
-    shutdown(client->io->fd, SHUT_RDWR);
-    Asoc_Destroy((Asoc *)client);
+    check(Webserver_Route(srv->urls, (Asoc *)client) == 0, "Error Happened");
+    // shutdown(client->io->fd, SHUT_RDWR);
+    // Asoc_Destroy((Asoc *)client);
   }
 
   srv->current_threads--;
@@ -148,6 +148,12 @@ int Webserver_Run(Webserver *srv) {
       pthread_cancel(srv->main);
       break;
     }
+  }
+
+  if (srv->type == HTTPS) {
+    Asoc_Destroy(((AsocSSL *)srv->sock)->as);
+  } else {
+    Asoc_Destroy((Asoc *)srv->sock);
   }
 
   return 0;

@@ -118,8 +118,15 @@ MunitResult test_new_url_ssl(const MunitParameter params[],
   log_info("t01");
   pthread_create(&server, NULL, thread01, (void *)srv);
 
-  sleep(1);
+  sleep(2);
+  log_info("t02");
+  pthread_create(
+      &client, NULL, thread02,
+      (void *)bformat("curl -i -k https://localhost:%d/ --output -", port));
 
+  pthread_join(client, NULL);
+
+  sleep(2);
   log_info("t02");
   pthread_create(
       &client, NULL, thread02,
