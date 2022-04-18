@@ -73,7 +73,7 @@ Response *Response_New(Request *req, bstring content, int status,
   resp->Headders = Map_New(NULL, NULL);
   check(resp->Headders != NULL, "Could not create headder map");
 
-  resp->version = req->version;
+  resp->version = req == NULL ? req->version : bfromcstr("HTTP/1.1");
 
   if (Response_Set_Status(resp, status) != 0)
     log_info("Error when setting status");

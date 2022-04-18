@@ -165,6 +165,8 @@ AsocSSL *AsocSSL_Accept(AsocSSL *srv) {
 
   check(c_soc != 0, "Could not accept connection");
   client->as->io = NewIoStream(c_soc, SSLFD, 1024 * 10);
+  client->as->host = bfromcstr(inet_ntoa(client->as->addr.sin_addr));
+  client->as->port = bformat("%d", client->as->addr.sin_port);
 
   srv->ssl = SSL_new(srv->ctx);
   check(srv->ssl != NULL, "Could not create SSL: %d",

@@ -113,12 +113,14 @@ int IoStreamIoRead(ioStream *str) {
   }
 
   check(rc != 0, "Failed to read form %s",
-        str->fd_t == SOCKFD ? "Socket" : "File");
+        str->fd_t == FILEFD  ? "File"
+        : str->fd_t == SSLFD ? "SSLSocket"
+                             : "Socket");
 
   RingBuffer_Commit_Write(str->in, rc);
   return rc;
 error:
-  return -1;
+  return 0;
 }
 
 int IoStreamIoWrite(ioStream *str) {

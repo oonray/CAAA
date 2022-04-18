@@ -54,6 +54,8 @@ Asoc *AsocAccept(Asoc *srv, int type) {
 
   check(c_soc != 0, "Could not accept connection");
   client->io = NewIoStream(c_soc, type == 0 ? SOCKFD : type, 1024 * 10);
+  client->host = bfromcstr(inet_ntoa(client->addr.sin_addr));
+  client->port = bformat("%d", client->addr.sin_port);
   return client;
 error:
   return NULL;

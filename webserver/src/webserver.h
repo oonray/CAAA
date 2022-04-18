@@ -23,7 +23,15 @@ typedef struct Webserver {
   void *sock;
   int port;
   bstring host;
+  pthread_t main;
+  pthread_t *thread_pool;
+  int current_threads;
 } Webserver;
+
+typedef struct Webserver_T_Data {
+  Webserver *srv;
+  void *client;
+} Webserver_T_Data;
 
 Webserver *Webserver_New(int type, TriTree *urls, int port, bstring host,
                          AsocSSLConfig *conf);
