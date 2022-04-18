@@ -221,6 +221,7 @@ add_library(soc_ssl $<TARGET_OBJECTS:soc_ssl_obj>)
 target_include_directories(soc_ssl_obj PRIVATE ${inc_src} "dbg/")
 target_link_libraries(soc_ssl PRIVATE soc fileio_ssl toml)
 install(TARGETS soc_ssl)
+
 add_dependencies(soc fileio)
 add_dependencies(soc ringbuffer)
 add_dependencies(soc_ssl fileio)
