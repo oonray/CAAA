@@ -54,7 +54,7 @@ void *thread02(void *data) {
 
 MunitResult test_new_url(const MunitParameter params[],
                          void *user_data_or_fixture) {
-  pthread_t server, client, client2;
+  pthread_t server, client, client2, client3;
   time_t t;
 
   srand((unsigned)time(&t));
@@ -83,12 +83,19 @@ MunitResult test_new_url(const MunitParameter params[],
 
   log_info("t03");
   pthread_create(
+      &client3, NULL, thread02,
+      (void *)bformat("curl -ik http://localhost:%d/asdfasdfasdf --output -",
+                      port));
+
+  pthread_join(client3, NULL);
+
+  log_info("t04");
+  pthread_create(
       &client2, NULL, thread02,
       (void *)bformat("curl -ik http://localhost:%d/kill --output -", port));
 
   pthread_join(server, NULL);
   log_info("join");
-  Webserver_Destroy(srv);
 
   return MUNIT_OK;
 error:

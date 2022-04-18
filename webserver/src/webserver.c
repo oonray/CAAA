@@ -146,6 +146,7 @@ int Webserver_Run(Webserver *srv) {
   for (;;) {
     if (srv->terminate) {
       for (int i = 0; i < srv->current_threads; i++) {
+        check_continue(srv->thread_pool[i] == NULL, "Invalid pointer skipping");
         pthread_join(srv->thread_pool[i], NULL);
       }
       pthread_cancel(srv->main);
@@ -165,14 +166,12 @@ error:
 }
 
 int Webserver_Route(TriTree *urls, Asoc *peer) {
-  // Read from socket
   IoStreamIoRead(peer->io);
 
   bstring data = IoStreamBuffRead(peer->io);
   check(data != NULL, "could not read form peer");
 
   Request *req = Request_New(data);
-
   url_handler handler =
       TriTree_Search(urls, bdata(req->uri), blength(req->uri));
 
@@ -182,7 +181,8 @@ int Webserver_Route(TriTree *urls, Asoc *peer) {
 
     IoStreamBuffWrite(peer->io, data);
     IoStreamIoWrite(peer->io);
-    return 1;
+    shutdown(peer->io->fd, SHUT_RDWR);
+    return 0;
   }
 
   Response *resp = handler(req);
@@ -194,6 +194,7 @@ int Webserver_Route(TriTree *urls, Asoc *peer) {
   shutdown(peer->io->fd, SHUT_RDWR);
   return 0;
 error:
+  shutdown(peer->io->fd, SHUT_RDWR);
   return -1;
 }
 
