@@ -6,6 +6,7 @@
 #include "ssl.h"
 #include "tritree.h"
 #include <netinet/in.h>
+#include <openssl/ssl.h>
 #include <sys/socket.h>
 
 Webserver *Webserver_New(int type, TriTree *urls, int port, bstring host,
@@ -57,14 +58,17 @@ void *Webserver_Run_T(void *inp) {
   Webserver *srv = in->srv;
 
   if (srv->type == HTTPS) {
-    AsocSSL *client = ((AsocSSL *)in)->client;
-    check(Webserver_Route(srv->urls, ((AsocSSL *)client)->as) == 0,
+    AsocSSL *client = (AsocSSL *)in->client;
+    check(Webserver_Route(srv->urls, client->as) == 0,
           "Error Happened"); // peer);
+
+    SSL_shutdown(((AsocSSL *)srv->sock)->ssl);
     AsocSSL_Destroy((AsocSSL *)client);
   } else {
     Asoc *client = ((Asoc *)in->client);
     check(Webserver_Route(srv->urls, (Asoc *)client) == 0,
           "Error Happened"); // peer);
+    shutdown(client->io->fd, SHUT_RDWR);
     Asoc_Destroy((Asoc *)client);
   }
 
@@ -72,6 +76,7 @@ void *Webserver_Run_T(void *inp) {
 
   return bfromcstr("0");
 error:
+
   return bfromcstr("1");
 }
 
@@ -89,7 +94,8 @@ void *Webserver_Main_T(void *inp) {
     check_continue(client != NULL, "Could not accept connection from peer");
 
     if (srv->type == HTTPS)
-      log_info("connection from %s:%s", bdata(((AsocSSL *)client)->as->host),
+      log_info("ssl connection from %s:%s",
+               bdata(((AsocSSL *)client)->as->host),
                bdata(((AsocSSL *)client)->as->port));
 
     if (srv->type == HTTP)
@@ -125,8 +131,6 @@ int Webserver_Run(Webserver *srv) {
   log_info("Running on %s://%s:%d", srv->type == HTTPS ? "https" : "http",
            bdata(srv->host), srv->port);
 
-  log_info("Binding");
-
   if (srv->type == HTTPS) {
     check(AsocBind(((AsocSSL *)srv->sock)->as) == 0, "Could not bind");
     check(AsocListen(((AsocSSL *)srv->sock)->as, 0) == 0, "Could not listen");
@@ -153,9 +157,7 @@ error:
 
 int Webserver_Route(TriTree *urls, Asoc *peer) {
   // Read from socket
-  while (RingBuffer_Avaliable_Data(peer->io->in) <= 0) {
-    IoStreamIoRead(peer->io);
-  }
+  IoStreamIoRead(peer->io);
 
   bstring data = IoStreamBuffRead(peer->io);
   check(data != NULL, "could not read form peer");
@@ -171,8 +173,6 @@ int Webserver_Route(TriTree *urls, Asoc *peer) {
 
     IoStreamBuffWrite(peer->io, data);
     IoStreamIoWrite(peer->io);
-    shutdown(peer->io->fd, SHUT_RDWR);
-    Asoc_Destroy(peer);
     return 1;
   }
 

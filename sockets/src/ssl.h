@@ -1,6 +1,8 @@
 #ifndef ASOC_SSL_H_
 #define ASOC_SSL_H_
 
+#define _WITH_OPEN_SSL
+
 #include <sys/stat.h>
 #include <toml.h>
 
@@ -28,6 +30,7 @@ typedef struct AsocSSLClientConfig {
   X509 *cert;
   X509_NAME *issuername;
   X509_NAME *certname;
+  SSL_CTX *ctx;
   const SSL_METHOD *method;
 } AsocSSLClientConfig;
 
@@ -40,6 +43,9 @@ typedef struct AsocSSLConfig {
   bstring pki;
   bstring cert;
   bstring AsocSSLConfig;
+  const SSL_METHOD *method;
+  SSL_CTX *ctx;
+
 } AsocSSLConfig;
 
 AsocSSLConfig *AsocSSLConfig_New(bstring folder);
@@ -50,7 +56,6 @@ typedef struct AsocSSL {
   Asoc *as;
   AsocSSLConfig *config;
   AsocSSLClientConfig *client;
-  SSL_CTX *ctx;
   SSL *ssl;
 } AsocSSL;
 

@@ -1,6 +1,7 @@
 #include <arpa/inet.h>
 #include <fcntl.h>
 #include <netdb.h>
+#include <openssl/ssl.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,6 +11,10 @@
 #include <sys/types.h>
 #include <sys/uio.h>
 #include <unistd.h>
+
+#ifdef _WITH_OPEN_SSL
+#include <openssl/ssl3.h>
+#endif
 
 #include "bstrlib.h"
 #include "dbg.h"
@@ -38,10 +43,10 @@ typedef size_t (*fileWriter)(int, const void *, size_t);
 typedef ssize_t (*sockReader)(int, void *, size_t, int);
 typedef ssize_t (*sockWriter)(int, const void *, size_t, int);
 
+#ifdef _WITH_OPEN_SSL
 // if openssl
-#ifdef HEADER_SSL_H
-typedef ssize_t (*sslSockReader)(struct ssl_st *, void *, size_t, int);
-typedef ssize_t (*sslSockWriter)(struct ssl_st *, void *, size_t, int);
+typedef int (*sslSockReader)(SSL *, void *, int);
+typedef int (*sslSockWriter)(SSL *, void *, int);
 #endif
 
 typedef struct ioStream {
@@ -50,7 +55,9 @@ typedef struct ioStream {
   RingBuffer *in;
   void *reader;
   void *writer;
-  void *ssl;
+#ifdef _WITH_OPEN_SSL
+  SSL *ssl;
+#endif
 } ioStream;
 
 ioStream *NewIoStream(int fd, int fd_t, size_t buf_t);

@@ -1,4 +1,5 @@
 #include "fileio.h"
+#include "bstrlib.h"
 #include <stddef.h>
 
 ioStream *NewIoStream(int fd, int fd_t, size_t buf_t) {
@@ -15,7 +16,7 @@ ioStream *NewIoStream(int fd, int fd_t, size_t buf_t) {
     out->reader = &recv;
     out->writer = &send;
     break;
-#ifdef HEADER_SSL_H
+#ifdef _WITH_OPEN_SSL
   case SSLFD:
     out->reader = &SSL_read;
     out->writer = &SSL_write;
@@ -62,12 +63,14 @@ error:
 
 ioStream *NewIoStreamSocketSOC(int inet, int type, int buf_t, void *ssl) {
   ioStream *stream = NewIoStreamSocket(inet, type, SOCKFD, buf_t);
+#ifdef _WITH_OPEN_SSL
   if (stream != NULL)
     stream->ssl = ssl;
+#endif
   return stream;
 }
 
-#ifdef HEADER_SSL_H
+#ifdef ASOC_SSL_H_
 ioStream *NewIoStreamSocketSSL(SSL *ssl, int inet, int type, int buf_t) {
   ioStream *str = NewIoStreamSocket(inet, type, SSLFD, buf_t);
   check(str != NULL, "Could not create stream");
@@ -94,22 +97,23 @@ int IoStreamIoRead(ioStream *str) {
 
   if (str->fd_t == SOCKFD) {
     sockReader r = (sockReader)str->reader;
-    rc = (*r)(str->fd, RingBuffer_Starts_At(str->in),
-              RingBuffer_Avaliable_Space(str->in), 0);
+    rc = r(str->fd, RingBuffer_Starts_At(str->in),
+           RingBuffer_Avaliable_Space(str->in), 0);
   }
 
-#ifdef HEADER_SSL_H
+#ifdef _WITH_OPEN_SSL
   if (str->fd_t == SSLFD) {
+    check(str->ssl != NULL, "SSL is null at read");
     sslSockReader r = (sslSockReader)str->reader;
-    rc = (*r)(str->ssl, RingBuffer_Starts_At(str->in),
-              RingBuffer_Avaliable_Space(str->in), 0);
+    rc = r(str->ssl, RingBuffer_Starts_At(str->in),
+           RingBuffer_Avaliable_Space(str->in));
   }
 #endif
 
   if (str->fd_t == FILEFD) {
     fileReader r = (fileReader)str->reader;
-    rc = (*r)(str->fd, RingBuffer_Starts_At(str->in),
-              RingBuffer_Avaliable_Space(str->in));
+    rc = r(str->fd, RingBuffer_Starts_At(str->in),
+           RingBuffer_Avaliable_Space(str->in));
   }
 
   check(rc != 0, "Failed to read form %s",
@@ -125,30 +129,34 @@ error:
 
 int IoStreamIoWrite(ioStream *str) {
   int rc = 0;
-  bstring data = RingBuffer_Get_All(str->in);
-  check(data != NULL, "Failed to get data from buffer");
-  check(bfindreplace(data, &NL, &CRLF, 0) == BSTR_OK,
-        "Failed to replace new lines");
 
   if (str->fd_t == SOCKFD) {
     sockWriter w = (sockWriter)str->writer;
-    rc = (*w)(str->fd, bdata(data), blength(data), 0);
+    rc = w(str->fd, RingBuffer_Starts_At(str->in),
+           RingBuffer_Avaliable_Data(str->in), 0);
   }
 
-#ifdef HEADER_SSL_H
+#ifdef _WITH_OPEN_SSL
   if (str->fd_t == SSLFD) {
+    check(str->ssl != NULL, "SSL is null at write");
     sslSockWriter w = (sslSockWriter)str->writer;
-    rc = (*w)(str->sslfd, bdata(data), blength(data), 0);
+    rc = w(str->ssl, RingBuffer_Starts_At(str->in),
+           RingBuffer_Avaliable_Data(str->in));
   }
 #endif
+
   if (str->fd_t == FILEFD) {
     fileWriter w = (fileWriter)str->writer;
-    rc = (*w)(str->fd, bdata(data), blength(data));
+    rc = w(str->fd, RingBuffer_Starts_At(str->in),
+           RingBuffer_Avaliable_Data(str->in));
   }
 
-  check(rc == blength(data), "Failed to write to %s",
-        str->fd_t == SOCKFD ? "Socket" : "File");
-  bdestroy(data);
+  RingBuffer_Commit_Read(str->in, rc);
+
+  check(rc > 0, "Failed to write to %s",
+        str->fd_t == FILEFD  ? "File"
+        : str->fd_t == SSLFD ? "SSLSocket"
+                             : "Socket");
 
   return rc;
 error:

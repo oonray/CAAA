@@ -95,11 +95,58 @@ error:
   return MUNIT_FAIL;
 }
 
+struct tagbstring conf_folder = bsStatic("../sockets/tests/");
+static AsocSSLConfig *conf;
+
+MunitResult test_new_url_ssl(const MunitParameter params[],
+                             void *user_data_or_fixture) {
+  pthread_t server, client, client2;
+  time_t t;
+
+  srand((unsigned)time(&t));
+  int port = (rand() % 10) + 31300;
+  conf = AsocSSLConfig_New(&conf_folder);
+
+  srv = Webserver_New(SSLFD, NULL, port, NULL, conf);
+  check(srv != NULL, "Could not Create Server");
+  log_info("Server Created");
+
+  Webserver_AddRoute(srv, bfromcstr("/"), handle_home);
+  Webserver_AddRoute(srv, bfromcstr("/kill"), handle_kill);
+  log_info("Routes added");
+
+  log_info("t01");
+  pthread_create(&server, NULL, thread01, (void *)srv);
+
+  sleep(1);
+
+  log_info("t02");
+  pthread_create(
+      &client, NULL, thread02,
+      (void *)bformat("curl -i -k https://localhost:%d/ --output -", port));
+
+  pthread_join(client, NULL);
+
+  log_info("t03");
+  pthread_create(
+      &client2, NULL, thread02,
+      (void *)bformat("curl -i -k https://localhost:%d/kill --output -", port));
+
+  pthread_join(server, NULL);
+  log_info("join");
+  Webserver_Destroy(srv);
+  return MUNIT_OK;
+error:
+  return MUNIT_FAIL;
+}
+
 int main(int argc, char *argv[]) {
   MunitTest tests[] = {
       {" webserver tests", test_new, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
       {" webserver test url", test_new_url, NULL, NULL, MUNIT_TEST_OPTION_NONE,
        NULL},
+      {" webserver test url ssl", test_new_url_ssl, NULL, NULL,
+       MUNIT_TEST_OPTION_NONE, NULL},
       {NULL, NULL, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL}};
 
   const MunitSuite suite = {"Webserver Tests", tests, NULL, 1,
