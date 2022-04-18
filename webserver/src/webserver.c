@@ -145,6 +145,9 @@ int Webserver_Run(Webserver *srv) {
 
   for (;;) {
     if (srv->terminate) {
+      for (int i = 0; i < srv->current_threads; i++) {
+        pthread_join(srv->thread_pool[i], NULL);
+      }
       pthread_cancel(srv->main);
       break;
     }
