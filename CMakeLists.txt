@@ -249,3 +249,20 @@ target_include_directories(web_tests PRIVATE ${inc_src} "dbg/")
 target_link_libraries(web_tests PRIVATE web)
 add_test(NAME web_tests
          COMMAND web_tests)
+
+#genssl
+add_library(genssl_obj OBJECT webserver/src/webserver.c webserver/src/request.c)
+target_include_directories(genssl_obj PRIVATE ${inc_src} "dbg/")
+
+add_library(genssl $<TARGET_OBJECTS:web_obj>)
+target_link_libraries(genssl PRIVATE fileio_ssl soc_ssl)
+
+install(TARGETS genssl)
+add_dependencies(web fileio_ssl)
+add_dependencies(web soc_ssl)
+
+add_executable(genssl_tests genssl/test/genssl_tests.c genssl/test/munit.c)
+target_include_directories(genssl_tests PRIVATE ${inc_src} "dbg/")
+target_link_libraries(genssl_tests PRIVATE genssl)
+add_test(NAME genssl_tests
+         COMMAND genssl_tests)

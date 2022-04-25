@@ -18,7 +18,8 @@
 #define ASOC_SSL_H_CONST_
 #define CONFIG_FOLDER "/etc/asoc/"
 #define CONFIG_FILE "ssl.conf"
-#define EXAMPLE_CONTENT "\n[ssl]\npki = \"<path>.pem\"\ncert = \"<path>.pem\"\n"
+#define EXAMPLE_CONTENT                                                        \
+  "\nr[ssl]\nrpki = \"<path>.pem\"\nrcert = \"<path>.pem\"\nr"
 #define RIGHTS S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH
 #endif
 
@@ -42,6 +43,8 @@ typedef struct AsocSSLConfig {
   toml_table_t *conf_data;
   bstring pki;
   bstring cert;
+  bstring folder;
+  bstring path;
   bstring AsocSSLConfig;
   const SSL_METHOD *method;
   SSL_CTX *ctx;
@@ -50,6 +53,7 @@ typedef struct AsocSSLConfig {
 
 AsocSSLConfig *AsocSSLConfig_New(bstring folder);
 void AsocSSLConfig_Destroy(AsocSSLConfig *conf);
+int AsocSSLConfig_Write(AsocSSLConfig *conf);
 
 typedef struct AsocSSL {
   int type;

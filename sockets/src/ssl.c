@@ -15,15 +15,32 @@ error:
   return NULL;
 }
 
-void AsocSSLClientConfig_Destroy(AsocSSLClientConfig *client) {}
+void AsocSSLClientConfig_Destroy(AsocSSLClientConfig *client) { free(client); }
+
+int AsocSSLConfig_Write(AsocSSLConfig *conf) {
+  bstring data = bformat("\n\r"
+                         "[pki]\n\r"
+                         "pki=\"%s\""
+                         "cert=\"%s\"",
+                         bdata(conf->pki), bdata(conf->cert));
+  ioStream *stream = NewIoStreamFile(conf->path, O_RDWR, 0);
+  check(stream != NULL, "Could not open file %s", bdata(conf->path));
+  check(IoStreamBuffWrite(stream, data) > 0, "Cold not write to %s",
+        bdata(conf->path));
+  check(IoStreamIoWrite(stream) > 0, "Could not write to file %s",
+        bdata(conf->path));
+  DestroyIoStream(stream);
+  return 0;
+error:
+  return -1;
+}
 
 AsocSSLConfig *AsocSSLConfig_New(bstring folder) {
-  ioStream *stream = NULL;
-
   AsocSSLConfig *conf = calloc(1, sizeof(AsocSSLConfig));
   check(conf != NULL, "Cold not allocate conf");
 
   conf->init = -1;
+  conf->folder = folder;
 
   if (IoFileStream_DirectoryExists(folder) < 0) {
     check(IoFileStream_DirectoryCreate(folder, S_IRWXU | S_IRGRP | S_IROTH) >=
@@ -32,17 +49,16 @@ AsocSSLConfig *AsocSSLConfig_New(bstring folder) {
   }
 
   bstring path = bformat("%s%s", bdata(folder), CONFIG_FILE);
+  conf->path = path;
 
   int rc = IoFileStream_FileExists(path);
   if (rc < 0) {
-    int fd = IoFileStream_FileCreate(path, RIGHTS);
-    check(fd >= 0, "Config file could not be created");
-    close(fd);
-    log_info("File %s Created", bdata(path));
-    stream = NewIoStreamFile(path, O_RDWR, 10 * 1024);
-    check(IoStreamBuffWrite(stream, bfromcstr(EXAMPLE_CONTENT)) >= 0,
-          "Could not write example text to buffer");
-    check(IoStreamIoWrite(stream) >= 0, "Could not write to file fd");
+    ioStream *stream = NewIoStreamFile(conf->path, O_RDWR, 0);
+    check(stream != NULL, "Could not open file %s", bdata(conf->path));
+    check(IoStreamBuffWrite(stream, bfromcstr(EXAMPLE_CONTENT)) > 0,
+          "Cold not write to %s", bdata(conf->path));
+    check(IoStreamIoWrite(stream) > 0, "Could not write to file %s",
+          bdata(conf->path));
     DestroyIoStream(stream);
   }
 
@@ -80,9 +96,6 @@ AsocSSLConfig *AsocSSLConfig_New(bstring folder) {
 
   return conf;
 error:
-  if (stream != NULL) {
-    DestroyIoStream(stream);
-  }
   if (conf != NULL)
     free(conf);
   return NULL;
