@@ -1,7 +1,10 @@
 #include "genssl.h"
+#include "ssl.h"
+#include <openssl/asn1.h>
 #include <openssl/bio.h>
 #include <openssl/pem.h>
 #include <openssl/rsa.h>
+#include <openssl/x509.h>
 
 KeyPair *KeyPair_New(AsocSSLConfig *conf) {
   KeyPair *pair = calloc(1, sizeof(KeyPair));
@@ -24,6 +27,10 @@ error:
 }
 
 void KeyPair_Destroy(KeyPair *pair) {
+  if (pair->pub != NULL)
+    BIO_free_all(pair->pub);
+  if (pair->priv != NULL)
+    BIO_free_all(pair->priv);
   if (pair->r != NULL)
     RSA_free(pair->r);
   if (pair->n != NULL)
@@ -47,4 +54,90 @@ int KeyPair_Write(KeyPair *pki) {
   return rc;
 error:
   return -1;
+}
+
+int KeyPair_Read(KeyPair *pki) {
+  pki->pub = BIO_new_file(
+      bdata(bformat("%s/%s", bdata(pki->conf->path), "public.pem")), "r");
+  pki->priv = BIO_new_file(bdata(pki->conf->pki), "r");
+
+  int rc = 0;
+  pki->r = PEM_read_bio_RSAPrivateKey(pki->priv, &pki->r, NULL, NULL);
+  check(pki->r != NULL, "Could not read private key");
+
+  pki->r = PEM_read_bio_RSAPublicKey(pki->priv, &pki->r, NULL, NULL);
+  check(pki->r != NULL, "Could not read public key");
+
+  return rc;
+error:
+  return -1;
+}
+
+X509_Self_Signed *SelfSigned_New(bstring loc, bstring company, bstring host,
+                                 int not_after, KeyPair *pair) {
+  X509_Self_Signed *out = calloc(1, sizeof(X509_Self_Signed));
+  check(out != NULL, "Could not allocate cert");
+
+  out->pair = pair;
+  if (out->pair == NULL) {
+    AsocSSLConfig *conf = AsocSSLConfig_New("./certs.out/");
+    check(conf != NULL, "conf is null");
+    out->pair = KeyPair_New(conf);
+    KeyPair_Write(out->pair);
+  }
+  KeyPair_Read(out->pair);
+
+  // we have keys anyways
+  out->cert = X509_new();
+  check(out->cert != NULL, "509 is not allocated");
+  ASN1_INTEGER_set_int64(X509_get_serialNumber(out->cert), 1);
+  X509_gmtime_adj(X509_get_notBefore(out->cert), 0);
+
+  // default is one year
+  // i hope my math is right
+  long end = not_after == 0 ? 31536000L : not_after;
+  X509_gmtime_adj(X509_get_notAfter(out->cert), end);
+
+  EVP_PKEY * key = EVP_PKEY_new();
+  EVP_PKEY_assign_RSA(key,out->pair->r);
+  check(key!=NULL,"Could not read key");
+  //now we have a EVP_KEY from the RSA
+
+  X509_set_pubkey(out->cert, key);
+
+  X509_NAME * name = X509_get_subject_name(x509);
+
+  bstring loc_local = loc==NULL?bfromcstr("AQ"):loc;
+  X509_NAME_add_entry_by_txt(name, "C",  MBSTRING_ASC, (unsigned char *)bdata(loc_local),-1, -1, 0);
+
+  bstring company_local = company == NULL?bfromcstr("Anonymoyus"):company;
+  X509_NAME_add_entry_by_txt(name, "O",  MBSTRING_ASC, (unsigned char *) bdata(company_local),-1, -1, 0);
+
+  bstring host_local = host == NULL? bfromcstr("localhost"):host;
+  X509_NAME_add_entry_by_txt(name, "CN", MBSTRING_ASC, (unsigned char *)bdata(host_local), -1, -1, 0);
+
+  X509_set_issuer_name(out->cert, name);
+  int rc = X509_sign(out->cert,EVP_sha512());
+  check(rc==0,"Could not sign");
+
+  return out;
+error:
+  SelfSigned_Destroy(out);
+  return NULL;
+}
+
+void SelfSigned_Destroy(X509_Self_Signed *cert){
+  if(cert->pair!=NULL)
+    KeyPair_Destroy(cert->pair);
+  if(cert->cert!=NUL)
+    X509_free(cert->cert);
+  if(cert!=NULL)
+    free(cert);
+}
+
+int SelfSigned_Write(X509_Self_Signed *cert){
+  bstring target = bformat("%s/%s",cert->pair->conf->path,"cert.pem");
+  cert->out = BIO_new_file(bdata(target),"w+");
+  int rc = PEM_write_bio_X509(cert->out,cert->cert);
+  return rc;
 }
