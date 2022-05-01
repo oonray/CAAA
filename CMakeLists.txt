@@ -251,15 +251,15 @@ add_test(NAME web_tests
          COMMAND web_tests)
 
 #genssl
-add_library(genssl_obj OBJECT webserver/src/webserver.c webserver/src/request.c)
+add_library(genssl_obj OBJECT genssl/src/genssl.c)
 target_include_directories(genssl_obj PRIVATE ${inc_src} "dbg/")
 
-add_library(genssl $<TARGET_OBJECTS:web_obj>)
+add_library(genssl $<TARGET_OBJECTS:genssl_obj>)
 target_link_libraries(genssl PRIVATE fileio_ssl soc_ssl)
 
 install(TARGETS genssl)
-add_dependencies(web fileio_ssl)
-add_dependencies(web soc_ssl)
+add_dependencies(genssl fileio_ssl)
+add_dependencies(genssl soc_ssl)
 
 add_executable(genssl_tests genssl/test/genssl_tests.c genssl/test/munit.c)
 target_include_directories(genssl_tests PRIVATE ${inc_src} "dbg/")

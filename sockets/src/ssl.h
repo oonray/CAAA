@@ -52,6 +52,7 @@ typedef struct AsocSSLConfig {
 } AsocSSLConfig;
 
 AsocSSLConfig *AsocSSLConfig_New(bstring folder);
+AsocSSLConfig *AsocSSLConfig_New_B(bstring folder);
 void AsocSSLConfig_Destroy(AsocSSLConfig *conf);
 int AsocSSLConfig_Write(AsocSSLConfig *conf);
 

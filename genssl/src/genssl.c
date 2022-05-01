@@ -12,13 +12,15 @@ KeyPair *KeyPair_New(AsocSSLConfig *conf) {
 
   int rc = 0;
 
-  pair->n = BN_New();
+  pair->conf = conf;
+
+  pair->n = BN_new();
   rc = BN_set_word(pair->n, RSA_F4);
-  check(rc == 0, "Could not set BNE");
+  check(rc >= 0, "Could not set BNE");
 
   pair->r = RSA_new();
   rc = RSA_generate_key_ex(pair->r, BITS, pair->n, NULL);
-  check(rc == 0, "Could not generate key");
+  check(rc >= 0, "Could not generate key");
 
   return pair;
 error:
@@ -39,17 +41,23 @@ void KeyPair_Destroy(KeyPair *pair) {
 }
 
 int KeyPair_Write(KeyPair *pki) {
-  pki->pub = BIO_new_file(
-      bdata(bformat("%s/%s", bdata(pki->conf->path), "public.pem")), "w+");
-  pki->priv = BIO_new_file(bdata(pki->conf->pki), "w+");
-
   int rc = 0;
+  bstring pub = bformat("%s%s", bdata(pki->conf->folder), "public.pem");
+
+  pki->pub = BIO_new_file(bdata(pub), "w+");
+  check(pki->pub != NULL, "Could not open file %s", bdata(pub));
+
+  rc = PEM_write_bio_RSAPublicKey(pki->pub, pki->r);
+  check(rc > 0, "Could not write public key");
+
+  bstring priv = bformat("%s%s", bdata(pki->conf->folder), "private.pem");
+  pki->priv = BIO_new_file(bdata(priv), "w+");
+  check(pki->priv != NULL, "Could not open private key %s",
+        bdata(pki->conf->pki));
+
   rc =
       PEM_write_bio_RSAPrivateKey(pki->priv, pki->r, NULL, NULL, 0, NULL, NULL);
-  check(rc == 0, "Could not write private key");
-
-  rc = PEM_write_bio_RSAPublicKey(pki->priv, pki->r);
-  check(rc == 0, "Could not write public key");
+  check(rc > 0, "Could not write private key");
 
   return rc;
 error:
@@ -57,16 +65,19 @@ error:
 }
 
 int KeyPair_Read(KeyPair *pki) {
-  pki->pub = BIO_new_file(
-      bdata(bformat("%s/%s", bdata(pki->conf->path), "public.pem")), "r");
-  pki->priv = BIO_new_file(bdata(pki->conf->pki), "r");
-
   int rc = 0;
+
+  bstring pub = bformat("%s%s", bdata(pki->conf->folder), "public.pem");
+  pki->pub = BIO_new_file(bdata(pub), "r");
+
+  pki->r = PEM_read_bio_RSAPublicKey(pki->pub, &pki->r, NULL, NULL);
+  check(pki->r != NULL, "Could not read public key");
+
+  bstring priv = bformat("%s%s", bdata(pki->conf->folder), "private.pem");
+  pki->priv = BIO_new_file(bdata(priv), "r");
+
   pki->r = PEM_read_bio_RSAPrivateKey(pki->priv, &pki->r, NULL, NULL);
   check(pki->r != NULL, "Could not read private key");
-
-  pki->r = PEM_read_bio_RSAPublicKey(pki->priv, &pki->r, NULL, NULL);
-  check(pki->r != NULL, "Could not read public key");
 
   return rc;
 error:
@@ -79,8 +90,9 @@ X509_Self_Signed *SelfSigned_New(bstring loc, bstring company, bstring host,
   check(out != NULL, "Could not allocate cert");
 
   out->pair = pair;
+
   if (out->pair == NULL) {
-    AsocSSLConfig *conf = AsocSSLConfig_New("./certs.out/");
+    AsocSSLConfig *conf = AsocSSLConfig_New(bfromcstr("./certs.out/"));
     check(conf != NULL, "conf is null");
     out->pair = KeyPair_New(conf);
     KeyPair_Write(out->pair);
@@ -98,27 +110,30 @@ X509_Self_Signed *SelfSigned_New(bstring loc, bstring company, bstring host,
   long end = not_after == 0 ? 31536000L : not_after;
   X509_gmtime_adj(X509_get_notAfter(out->cert), end);
 
-  EVP_PKEY * key = EVP_PKEY_new();
-  EVP_PKEY_assign_RSA(key,out->pair->r);
-  check(key!=NULL,"Could not read key");
-  //now we have a EVP_KEY from the RSA
+  EVP_PKEY *key = EVP_PKEY_new();
+  EVP_PKEY_assign_RSA(key, out->pair->r);
+  check(key != NULL, "Could not read key");
+  // now we have a EVP_KEY from the RSA
 
   X509_set_pubkey(out->cert, key);
 
-  X509_NAME * name = X509_get_subject_name(x509);
+  X509_NAME *name = X509_get_subject_name(out->cert);
 
-  bstring loc_local = loc==NULL?bfromcstr("AQ"):loc;
-  X509_NAME_add_entry_by_txt(name, "C",  MBSTRING_ASC, (unsigned char *)bdata(loc_local),-1, -1, 0);
+  bstring loc_local = loc == NULL ? bfromcstr("AQ") : loc;
+  X509_NAME_add_entry_by_txt(name, "C", MBSTRING_ASC,
+                             (unsigned char *)bdata(loc_local), -1, -1, 0);
 
-  bstring company_local = company == NULL?bfromcstr("Anonymoyus"):company;
-  X509_NAME_add_entry_by_txt(name, "O",  MBSTRING_ASC, (unsigned char *) bdata(company_local),-1, -1, 0);
+  bstring company_local = company == NULL ? bfromcstr("Anonymoyus") : company;
+  X509_NAME_add_entry_by_txt(name, "O", MBSTRING_ASC,
+                             (unsigned char *)bdata(company_local), -1, -1, 0);
 
-  bstring host_local = host == NULL? bfromcstr("localhost"):host;
-  X509_NAME_add_entry_by_txt(name, "CN", MBSTRING_ASC, (unsigned char *)bdata(host_local), -1, -1, 0);
+  bstring host_local = host == NULL ? bfromcstr("localhost") : host;
+  X509_NAME_add_entry_by_txt(name, "CN", MBSTRING_ASC,
+                             (unsigned char *)bdata(host_local), -1, -1, 0);
 
   X509_set_issuer_name(out->cert, name);
-  int rc = X509_sign(out->cert,EVP_sha512());
-  check(rc==0,"Could not sign");
+  int rc = X509_sign(out->cert, key, EVP_sha512());
+  check(rc > 0, "Could not sign");
 
   return out;
 error:
@@ -126,18 +141,18 @@ error:
   return NULL;
 }
 
-void SelfSigned_Destroy(X509_Self_Signed *cert){
-  if(cert->pair!=NULL)
+void SelfSigned_Destroy(X509_Self_Signed *cert) {
+  if (cert->pair != NULL)
     KeyPair_Destroy(cert->pair);
-  if(cert->cert!=NUL)
+  if (cert->cert != NULL)
     X509_free(cert->cert);
-  if(cert!=NULL)
+  if (cert != NULL)
     free(cert);
 }
 
-int SelfSigned_Write(X509_Self_Signed *cert){
-  bstring target = bformat("%s/%s",cert->pair->conf->path,"cert.pem");
-  cert->out = BIO_new_file(bdata(target),"w+");
-  int rc = PEM_write_bio_X509(cert->out,cert->cert);
+int SelfSigned_Write(X509_Self_Signed *cert) {
+  bstring target = bformat("%s%s", bdata(cert->pair->conf->folder), "cert.pem");
+  cert->out = BIO_new_file(bdata(target), "w+");
+  int rc = PEM_write_bio_X509(cert->out, cert->cert);
   return rc;
 }

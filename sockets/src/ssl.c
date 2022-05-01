@@ -101,6 +101,28 @@ error:
   return NULL;
 }
 
+AsocSSLConfig *AsocSSLConfig_New_B(bstring folder) {
+  AsocSSLConfig *conf = calloc(1, sizeof(AsocSSLConfig));
+  check(conf != NULL, "Cold not allocate conf");
+
+  conf->init = -1;
+  conf->folder = folder;
+  if (IoFileStream_DirectoryExists(folder) < 0) {
+    check(IoFileStream_DirectoryCreate(folder, S_IRWXU | S_IRGRP | S_IROTH) >=
+              0,
+          "Config dir could not be created");
+  }
+
+  conf->path = bformat("%s%s", bdata(folder), CONFIG_FILE);
+  conf->pki = bformat("%s%s", bdata(folder), "private.pem");
+
+  return conf;
+error:
+  if (conf != NULL)
+    free(conf);
+  return NULL;
+}
+
 void AsocSSL_Destroy(AsocSSL *conf) { free(conf); }
 
 void AsocSSL_Init() {
