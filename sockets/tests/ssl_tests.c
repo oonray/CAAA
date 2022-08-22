@@ -1,9 +1,11 @@
 #include "bstrlib.h"
+#include "dbg.h"
 #include "munit.h"
 #include "pthread.h"
+#include "ringbuffer.h"
 #include "ssl.h"
 
-#define PORT 31338
+#define PORT 31316
 
 struct tagbstring conf_folder = bsStatic("../sockets/tests/");
 static AsocSSLConfig *conf;
@@ -170,10 +172,13 @@ error:
   return MUNIT_FAIL;
 }
 
+struct tagbstring ssl_out = bsStatic("Hello World");
+
 void *thread03(void *data) {
+  sleep(2);
   AsocSSL *client = (AsocSSL *)data;
   AsocSSLConnect(client);
-  IoStreamBuffWrite(client->as->io, bfromcstr("Hello World"));
+  IoStreamBuffWrite(client->as->io, &ssl_out);
   IoStreamIoWrite(client->as->io);
   return NULL;
 }
@@ -190,14 +195,19 @@ void *thread04(void *data) {
 
   log_info("Listening on %s:%s", bdata(srv->as->host), bdata(srv->as->port));
   AsocSSL *peer = AsocSSL_Accept(srv);
+  log_info("Accepted connection");
 
   IoStreamIoRead(peer->as->io);
   bstring out = IoStreamBuffRead(peer->as->io);
+  log_info("\n%s", bdata(out));
+  check(bstrcmp(out, &ssl_out) == 0, "Wrong data recieved");
+  log_info("Return");
 
-  return peer;
+  return (void *)peer;
 error:
   return NULL;
 }
+
 MunitResult test_send_recieve(const MunitParameter params[],
                               void *user_data_or_fixture) {
   pthread_t server_t, client_t;
@@ -211,7 +221,14 @@ MunitResult test_send_recieve(const MunitParameter params[],
   check(client != NULL, "Failed to create client");
 
   pthread_create(&server_t, NULL, thread04, (void *)srv);
+  sleep(1);
   pthread_create(&client_t, NULL, thread03, (void *)client);
+
+  pthread_join(client_t, NULL);
+  pthread_join(server_t, NULL);
+  void *out = NULL;
+  pthread_join(client_t, &out);
+  check(out != NULL, "Wrong value recieved");
 
   return MUNIT_OK;
 error:
@@ -220,15 +237,17 @@ error:
 
 int main(int argc, char *argv[]) {
   MunitTest tests[] = {
-      {" test_certs", test_certs, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
-      {" test_new_config", test_new_config, NULL, NULL, MUNIT_TEST_OPTION_NONE,
-       NULL},
-      {" test_new_config", test_new_config_conf, NULL, NULL,
-       MUNIT_TEST_OPTION_NONE, NULL},
-      {" test_new", test_new, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
-      {" test_bind", test_bind, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
-      {" test_listen", test_listen, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
-      {" test_accept", test_accept, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
+      //     {" test_certs", test_certs, NULL, NULL, MUNIT_TEST_OPTION_NONE,
+      //     NULL},
+      //{" test_new_config", test_new_config, NULL, NULL,
+      // MUNIT_TEST_OPTION_NONE,
+      // NULL},
+      //{" test_new_config", test_new_config_conf, NULL, NULL,
+      // MUNIT_TEST_OPTION_NONE, NULL},
+      //{" test_new", test_new, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
+      //{" test_bind", test_bind, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
+      //{" test_listen", test_listen, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
+      //{" test_accept", test_accept, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
       {" test_send_recieve", test_send_recieve, NULL, NULL,
        MUNIT_TEST_OPTION_NONE, NULL},
 

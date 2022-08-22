@@ -4,13 +4,13 @@
 #include "fileio.h"
 #endif
 
-struct tagbstring file = bsStatic("file.out");
+struct tagbstring file = bsStatic("./file.out");
 struct tagbstring content = bsStatic("loremipsumsetdoloramet");
 
 MunitResult test_new_file(const MunitParameter params[],
                           void *user_data_or_fixture) {
-  ioStream *stream = NewIoStreamFile(&file, O_CREAT | O_RDWR, 0644, 1024 * 10);
-  check(stream != NULL, "Could not create Stream");
+  ioStream *stream = NewIoStreamFile(&file, CREATE_RW | 0766, 1024 * 10);
+  check(stream != NULL, "Could not create Stream %s", bdata(&file));
   DestroyIoStream(stream);
   return MUNIT_OK;
 error:
@@ -30,7 +30,7 @@ error:
 MunitResult test_new_std(const MunitParameter params[],
                          void *user_data_or_fixture) {
   ioStream *stream = NewIoStream(ERR, FILEFD, 1024 * 10);
-  check(stream != NULL, "Could not create Stream");
+  check(stream != NULL, "Could not create Stream stderr");
   DestroyIoStream(stream);
   return MUNIT_OK;
 error:
@@ -39,8 +39,8 @@ error:
 
 MunitResult test_file_read_write(const MunitParameter params[],
                                  void *user_data_or_fixture) {
-  ioStream *stream = NewIoStreamFile(&file, O_CREAT | O_RDWR, 0644, 1024 * 10);
-  check(stream != NULL, "Could not create Stream");
+  ioStream *stream = NewIoStreamFile(&file, O_RDWR, 1024 * 10);
+  check(stream != NULL, "Could not create Stream %s", bdata(&file));
 
   int rc = IoStreamBuffWrite(stream, &content);
   check(rc > 0, "Could not write to buffer");
@@ -50,9 +50,9 @@ MunitResult test_file_read_write(const MunitParameter params[],
   check(rc > 0, "Could not write to io");
   DestroyIoStream(stream);
 
-  // TODO: automate opening and closing
+  stream = NewIoStreamFile(&file, O_RDWR, 1024 * 10);
+  check(stream != NULL, "Could not open file %s", bdata(&file));
 
-  stream = NewIoStreamFile(&file, O_CREAT | O_RDWR, 0644, 1024 * 10);
   rc = IoStreamIoRead(stream);
   check(rc > 0, "Could not read from io");
 

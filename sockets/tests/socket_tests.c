@@ -1,7 +1,7 @@
 #include "munit.h"
 #include "soc.h"
 
-#define PORT 32337
+#define PORT 32340
 
 MunitResult test_new(const MunitParameter params[],
                      void *user_data_or_fixture) {

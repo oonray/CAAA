@@ -2,6 +2,7 @@
 #include "dbg.h"
 #include "map.h"
 #include "munit.h"
+#include "ringbuffer.h"
 #include "tritree.h"
 
 void traverse(void *value, void *data) {
@@ -12,10 +13,12 @@ MunitResult test_new(const MunitParameter params[],
                      void *user_data_or_fixture) {
   log_info("Reading File");
   ioStream *req = NewIoStreamFile(bfromcstr("../webserver/tests/request.req"),
-                                  O_RDWR, 0644, 1024 * 10);
+                                  O_RDWR, 1024 * 10);
   check(IoStreamIoRead(req) > 0, "Could not read request");
+  check(RingBuffer_Avaliable_Data(req->in) > 0, "Data Read error");
 
   log_info("Loading Request");
+
   Request *r = Request_New(RingBuffer_Get_All(req->in));
   check(r != NULL, "Error in getting Request");
 
@@ -55,7 +58,7 @@ error:
 MunitResult test_response(const MunitParameter params[],
                           void *user_data_or_fixture) {
   ioStream *req = NewIoStreamFile(bfromcstr("../webserver/tests/request.req"),
-                                  O_RDWR, 0644, 1024 * 10);
+                                  O_RDWR, 1024 * 10);
   check(IoStreamIoRead(req) > 0, "Could not read request");
 
   log_info("Loading Request");

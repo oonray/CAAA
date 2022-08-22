@@ -1,30 +1,34 @@
 #include "fileio.h"
+#include "bstrlib.h"
+#include <stddef.h>
 
 ioStream *NewIoStream(int fd, int fd_t, size_t buf_t) {
   ioStream *out = calloc(1, sizeof(ioStream));
   check(out != NULL, "Could not create IO Stream");
+
+  size_t b_size = buf_t == 0 ? 1024 * 5 : buf_t;
 
   out->fd = fd;
   out->fd_t = fd_t;
 
   switch (fd_t) {
   case SOCKFD:
-    out->reader.sockReader = &recv;
-    out->writer.sockWriter = &send;
+    out->reader = &recv;
+    out->writer = &send;
     break;
-#ifdef HEADER_SSL_H
+#ifdef _WITH_OPEN_SSL
   case SSLFD:
-    out->reader.sockReader = &SSL_read;
-    out->writer.sockWriter = &SSL_write;
+    out->reader = &SSL_read;
+    out->writer = &SSL_write;
     break;
 #endif
   default:
-    out->reader.fileReader = &read;
-    out->writer.fileWriter = &write;
+    out->reader = &read;
+    out->writer = &write;
     break;
   }
 
-  out->in = RingBuffer_New(buf_t);
+  out->in = RingBuffer_New(b_size);
   check(out->in != NULL, "Could not create in stream");
 
   return out;
@@ -32,11 +36,19 @@ error:
   return NULL;
 }
 
-ioStream *NewIoStreamFile(bstring path, int flags, int rights, int buf_t) {
+ioStream *NewIoStreamFile(bstring path, int flags, int buf_t) {
   const char *pt = bdata(path);
-  int fd = open(pt, flags, rights);
-  check(fd >= 0, "Could not open file");
+  int fd = open(pt, flags);
+  check(fd >= 0, "Could not open file %s", bdata(path));
   return NewIoStream(fd, FILEFD, buf_t);
+error:
+  return NULL;
+}
+
+ioStream *NewIoStreamFromFILE(FILE *fp, int buf_t) {
+  int fd = fileno(fp);
+  ioStream *stream = NewIoStream(fd, FILEFD, buf_t);
+  return stream;
 error:
   return NULL;
 }
@@ -49,11 +61,16 @@ error:
   return NULL;
 }
 
-ioStream *NewIoStreamSocketSOC(int inet, int type, int buf_t) {
-  return NewIoStreamSocket(inet, type, SOCKFD, buf_t);
+ioStream *NewIoStreamSocketSOC(int inet, int type, int buf_t, void *ssl) {
+  ioStream *stream = NewIoStreamSocket(inet, type, SOCKFD, buf_t);
+#ifdef _WITH_OPEN_SSL
+  if (stream != NULL)
+    stream->ssl = ssl;
+#endif
+  return stream;
 }
 
-#ifdef HEADER_SSL_H
+#ifdef ASOC_SSL_H_
 ioStream *NewIoStreamSocketSSL(SSL *ssl, int inet, int type, int buf_t) {
   ioStream *str = NewIoStreamSocket(inet, type, SSLFD, buf_t);
   check(str != NULL, "Could not create stream");
@@ -79,51 +96,67 @@ int IoStreamIoRead(ioStream *str) {
   }
 
   if (str->fd_t == SOCKFD) {
-    rc = str->reader.sockReader(str->fd, RingBuffer_Starts_At(str->in),
-                                RingBuffer_Avaliable_Space(str->in), 0);
+    sockReader r = (sockReader)str->reader;
+    rc = r(str->fd, RingBuffer_Starts_At(str->in),
+           RingBuffer_Avaliable_Space(str->in), 0);
   }
-#ifdef HEADER_SSL_H
-  else if (str->fd_t == SSLFD) {
-    rc = str->reader.sslSocketReader(str->ssl, RingBuffer_Starts_At(str->in),
-                                     RingBuffer_Avaliable_Space(str->in), 0);
+
+#ifdef _WITH_OPEN_SSL
+  if (str->fd_t == SSLFD) {
+    check(str->ssl != NULL, "SSL is null at read");
+    sslSockReader r = (sslSockReader)str->reader;
+    rc = r(str->ssl, RingBuffer_Starts_At(str->in),
+           RingBuffer_Avaliable_Space(str->in));
   }
 #endif
-  else {
-    rc = str->reader.fileReader(str->fd, RingBuffer_Starts_At(str->in),
-                                RingBuffer_Avaliable_Space(str->in));
+
+  if (str->fd_t == FILEFD) {
+    fileReader r = (fileReader)str->reader;
+    rc = r(str->fd, RingBuffer_Starts_At(str->in),
+           RingBuffer_Avaliable_Space(str->in));
   }
 
   check(rc != 0, "Failed to read form %s",
-        str->fd_t == SOCKFD ? "Socket" : "File");
+        str->fd_t == FILEFD  ? "File"
+        : str->fd_t == SSLFD ? "SSLSocket"
+                             : "Socket");
 
-  RingBuffer_Commit_Read(str->in, rc);
+  RingBuffer_Commit_Write(str->in, rc);
   return rc;
 error:
-  return -1;
+  return 0;
 }
 
 int IoStreamIoWrite(ioStream *str) {
   int rc = 0;
-  bstring data = RingBuffer_Get_All(str->in);
-  check(data != NULL, "Failed to get data from buffer");
-  check(bfindreplace(data, &NL, &CRLF, 0) == BSTR_OK,
-        "Failed to replace new lines");
 
   if (str->fd_t == SOCKFD) {
-    rc = str->writer.sockWriter(str->fd, bdata(data), blength(data), 0);
-  }
-#ifdef HEADER_SSL_H
-  else if (str->fd_t == SSLFD) {
-    rc = str->reader.sslSocketWriter(str->sslfd, bdata(data), blength(data), 0);
-  }
-#endif
-  else {
-    rc = str->writer.fileWriter(str->fd, bdata(data), blength(data));
+    sockWriter w = (sockWriter)str->writer;
+    rc = w(str->fd, RingBuffer_Starts_At(str->in),
+           RingBuffer_Avaliable_Data(str->in), 0);
   }
 
-  check(rc == blength(data), "Failed to write to %s",
-        str->fd_t == SOCKFD ? "Socket" : "File");
-  bdestroy(data);
+#ifdef _WITH_OPEN_SSL
+  if (str->fd_t == SSLFD) {
+    check(str->ssl != NULL, "SSL is null at write");
+    sslSockWriter w = (sslSockWriter)str->writer;
+    rc = w(str->ssl, RingBuffer_Starts_At(str->in),
+           RingBuffer_Avaliable_Data(str->in));
+  }
+#endif
+
+  if (str->fd_t == FILEFD) {
+    fileWriter w = (fileWriter)str->writer;
+    rc = w(str->fd, RingBuffer_Starts_At(str->in),
+           RingBuffer_Avaliable_Data(str->in));
+  }
+
+  RingBuffer_Commit_Read(str->in, rc);
+
+  check(rc > 0, "Failed to write to %s",
+        str->fd_t == FILEFD  ? "File"
+        : str->fd_t == SSLFD ? "SSLSocket"
+                             : "Socket");
 
   return rc;
 error:
@@ -163,8 +196,8 @@ error:
   return -1;
 }
 
-int IoFileStream_FileCreate(bstring file, int prem) {
-  int fd = open(file->data, O_CREAT | O_RDWR | O_TRUNC, prem);
+int IoFileStream_FileCreate(bstring file, mode_t mode) {
+  int fd = open(bdata(file), mode);
   check(fd > 0, "File %s could not be created", bdata(file));
   return fd;
 error:
@@ -181,8 +214,8 @@ error:
   return -1;
 }
 
-int IoFileStream_DirectoryCreate(bstring directory, int prem) {
-  int fd = mkdir(directory->data, prem);
+int IoFileStream_DirectoryCreate(bstring directory, mode_t mode) {
+  int fd = mkdir(bdata(directory), mode);
   check(fd >= 0, "Directory could not be created");
   close(fd);
   return 0;

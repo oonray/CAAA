@@ -1,6 +1,8 @@
 #ifndef ASOC_SSL_H_
 #define ASOC_SSL_H_
 
+#define _WITH_OPEN_SSL
+
 #include <sys/stat.h>
 #include <toml.h>
 
@@ -16,7 +18,8 @@
 #define ASOC_SSL_H_CONST_
 #define CONFIG_FOLDER "/etc/asoc/"
 #define CONFIG_FILE "ssl.conf"
-#define EXAMPLE_CONTENT "\n[ssl]\npki = \"<path>.pem\"\ncert = \"<path>.pem\"\n"
+#define EXAMPLE_CONTENT                                                        \
+  "\nr[ssl]\nrpki = \"<path>.pem\"\nrcert = \"<path>.pem\"\nr"
 #define RIGHTS S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH
 #endif
 
@@ -28,6 +31,7 @@ typedef struct AsocSSLClientConfig {
   X509 *cert;
   X509_NAME *issuername;
   X509_NAME *certname;
+  SSL_CTX *ctx;
   const SSL_METHOD *method;
 } AsocSSLClientConfig;
 
@@ -39,18 +43,24 @@ typedef struct AsocSSLConfig {
   toml_table_t *conf_data;
   bstring pki;
   bstring cert;
+  bstring folder;
+  bstring path;
   bstring AsocSSLConfig;
+  const SSL_METHOD *method;
+  SSL_CTX *ctx;
+
 } AsocSSLConfig;
 
 AsocSSLConfig *AsocSSLConfig_New(bstring folder);
+AsocSSLConfig *AsocSSLConfig_New_B(bstring folder);
 void AsocSSLConfig_Destroy(AsocSSLConfig *conf);
+int AsocSSLConfig_Write(AsocSSLConfig *conf);
 
 typedef struct AsocSSL {
   int type;
   Asoc *as;
   AsocSSLConfig *config;
   AsocSSLClientConfig *client;
-  SSL_CTX *ctx;
   SSL *ssl;
 } AsocSSL;
 

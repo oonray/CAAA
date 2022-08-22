@@ -6,7 +6,7 @@ Asoc *Asoc_New(int proto, int type, int port, bstring ip, int stype) {
 
   stype = stype == 0 ? SOCKFD : stype;
 
-  srv->io = NewIoStreamSocketSOC(proto, type, 1024 * 10);
+  srv->io = NewIoStreamSocketSOC(proto, type, 1024 * 10, NULL);
 
   check(srv->io != NULL, "Could not create io");
 
@@ -54,6 +54,8 @@ Asoc *AsocAccept(Asoc *srv, int type) {
 
   check(c_soc != 0, "Could not accept connection");
   client->io = NewIoStream(c_soc, type == 0 ? SOCKFD : type, 1024 * 10);
+  client->host = bfromcstr(inet_ntoa(client->addr.sin_addr));
+  client->port = bformat("%d", client->addr.sin_port);
   return client;
 error:
   return NULL;

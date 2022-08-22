@@ -7,40 +7,58 @@ AsocSSLClientConfig *AsocSSLClientConfig_New() {
   AsocSSLClientConfig *conf = calloc(1, sizeof(AsocSSLClientConfig));
   check(conf != NULL, "Could not create conf");
 
-  // conf->method = SSLv23_client_method();
-  //  conf->certbio = BIO_new(BIO_s_file());
+  OpenSSL_add_all_algorithms();
+  conf->ctx = SSL_CTX_new(TLS_client_method());
+  conf->method = TLS_client_method();
   return conf;
 error:
   return NULL;
 }
 
-void AsocSSLClientConfig_Destroy(AsocSSLClientConfig *client) {}
+void AsocSSLClientConfig_Destroy(AsocSSLClientConfig *client) { free(client); }
+
+int AsocSSLConfig_Write(AsocSSLConfig *conf) {
+  bstring data = bformat("\n\r"
+                         "[pki]\n\r"
+                         "pki=\"%s\""
+                         "cert=\"%s\"",
+                         bdata(conf->pki), bdata(conf->cert));
+  ioStream *stream = NewIoStreamFile(conf->path, O_RDWR, 0);
+  check(stream != NULL, "Could not open file %s", bdata(conf->path));
+  check(IoStreamBuffWrite(stream, data) > 0, "Cold not write to %s",
+        bdata(conf->path));
+  check(IoStreamIoWrite(stream) > 0, "Could not write to file %s",
+        bdata(conf->path));
+  DestroyIoStream(stream);
+  return 0;
+error:
+  return -1;
+}
 
 AsocSSLConfig *AsocSSLConfig_New(bstring folder) {
-  ioStream *stream = NULL;
-
   AsocSSLConfig *conf = calloc(1, sizeof(AsocSSLConfig));
   check(conf != NULL, "Cold not allocate conf");
 
   conf->init = -1;
+  conf->folder = folder;
 
   if (IoFileStream_DirectoryExists(folder) < 0) {
-    check(IoFileStream_DirectoryCreate(folder, RIGHTS) >= 0,
+    check(IoFileStream_DirectoryCreate(folder, S_IRWXU | S_IRGRP | S_IROTH) >=
+              0,
           "Config dir could not be created");
   }
 
   bstring path = bformat("%s%s", bdata(folder), CONFIG_FILE);
+  conf->path = path;
 
   int rc = IoFileStream_FileExists(path);
   if (rc < 0) {
-    int fd = IoFileStream_FileCreate(path, RIGHTS);
-    check(fd >= 0, "Config file could not be created");
-    close(fd);
-    log_info("File %s Created", bdata(path));
-    stream = NewIoStreamFile(path, O_RDWR, RIGHTS, 10 * 1024);
-    check(IoStreamBuffWrite(stream, bfromcstr(EXAMPLE_CONTENT)) >= 0,
-          "Could not write example text to buffer");
-    check(IoStreamIoWrite(stream) >= 0, "Could not write to file fd");
+    ioStream *stream = NewIoStreamFile(conf->path, O_RDWR, 0);
+    check(stream != NULL, "Could not open file %s", bdata(conf->path));
+    check(IoStreamBuffWrite(stream, bfromcstr(EXAMPLE_CONTENT)) > 0,
+          "Cold not write to %s", bdata(conf->path));
+    check(IoStreamIoWrite(stream) > 0, "Could not write to file %s",
+          bdata(conf->path));
     DestroyIoStream(stream);
   }
 
@@ -56,16 +74,50 @@ AsocSSLConfig *AsocSSLConfig_New(bstring folder) {
   toml_datum_t pki = toml_string_in(ssl, "pki");
   toml_datum_t cert = toml_string_in(ssl, "cert");
 
+  conf->method = TLS_server_method();
+  check(conf->method != NULL, "SSL method is null");
+  conf->ctx = SSL_CTX_new(conf->method);
+  check(conf->ctx != NULL, "SSL CTX is null");
+
   conf->pki = bfromcstr(pki.u.s);
   check(bstrcmp(conf->pki, bfromcstr("")) != 0, "Could not get pki");
   conf->cert = bfromcstr(cert.u.s);
   check(bstrcmp(conf->pki, bfromcstr("")) != 0, "Could not get cert");
 
+  log_info("Using cert %s", bdata(conf->cert));
+  check(SSL_CTX_use_certificate_file(conf->ctx, bdata(conf->cert),
+                                     SSL_FILETYPE_PEM) >= 0,
+        "Could not load cert");
+
+  log_info("Using key %s", bdata(conf->pki));
+  check(SSL_CTX_use_PrivateKey_file(conf->ctx, bdata(conf->pki),
+                                    SSL_FILETYPE_PEM) >= 0,
+        "Could not use pki");
+
   return conf;
 error:
-  if (stream != NULL) {
-    DestroyIoStream(stream);
+  if (conf != NULL)
+    free(conf);
+  return NULL;
+}
+
+AsocSSLConfig *AsocSSLConfig_New_B(bstring folder) {
+  AsocSSLConfig *conf = calloc(1, sizeof(AsocSSLConfig));
+  check(conf != NULL, "Cold not allocate conf");
+
+  conf->init = -1;
+  conf->folder = folder;
+  if (IoFileStream_DirectoryExists(folder) < 0) {
+    check(IoFileStream_DirectoryCreate(folder, S_IRWXU | S_IRGRP | S_IROTH) >=
+              0,
+          "Config dir could not be created");
   }
+
+  conf->path = bformat("%s%s", bdata(folder), CONFIG_FILE);
+  conf->pki = bformat("%s%s", bdata(folder), "private.pem");
+
+  return conf;
+error:
   if (conf != NULL)
     free(conf);
   return NULL;
@@ -96,7 +148,6 @@ AsocSSL *AsocSSL_New(int proto, int type, int port, bstring ip, int stype,
   asoc_ssl->as->ssl = asoc_ssl->ssl;
 
   check(asoc_ssl->as != NULL, "Could not create socket");
-
   check(asoc_ssl->as->host != NULL, "Error Creating socket, host is NULL");
   check(asoc_ssl->as->port != NULL, "Error Creating socket, port is NULL");
 
@@ -104,27 +155,10 @@ AsocSSL *AsocSSL_New(int proto, int type, int port, bstring ip, int stype,
     asoc_ssl->config = conf == NULL
                            ? AsocSSLConfig_New(bfromcstr(CONFIG_FOLDER))
                            : (AsocSSLConfig *)conf;
-
     check(asoc_ssl->config->conf_data != NULL, "Could not Create config");
-
-    asoc_ssl->ctx = SSL_CTX_new(TLS_server_method());
-    check(asoc_ssl->ctx != NULL, "SSL CTX is null");
-
-    log_info("Using cert %s", bdata(asoc_ssl->config->cert));
-    check(SSL_CTX_use_certificate_file(asoc_ssl->ctx,
-                                       bdata(asoc_ssl->config->cert),
-                                       SSL_FILETYPE_PEM) >= 0,
-          "Could not load cert");
-
-    log_info("Using key %s", bdata(asoc_ssl->config->pki));
-    check(SSL_CTX_use_PrivateKey_file(asoc_ssl->ctx,
-                                      bdata(asoc_ssl->config->pki),
-                                      SSL_FILETYPE_PEM) >= 0,
-          "Could not use pki");
   }
 
   if (asoc_ssl->type == CLIENT) {
-    asoc_ssl->ctx = SSL_CTX_new(TLS_client_method());
     asoc_ssl->client =
         conf == NULL ? AsocSSLClientConfig_New() : (AsocSSLClientConfig *)conf;
   }
@@ -163,12 +197,12 @@ AsocSSL *AsocSSL_Accept(AsocSSL *srv) {
                      (socklen_t *)&peer_len);
 
   check(c_soc != 0, "Could not accept connection");
-  client->as->io = NewIoStream(c_soc, SSLFD, 1024 * 10);
+  srv->ssl = SSL_new(srv->config->ctx);
 
-  srv->ssl = SSL_new(srv->ctx);
   check(srv->ssl != NULL, "Could not create SSL: %d",
         SSL_get_error(srv->ssl, 0));
-  SSL_set_fd(srv->ssl, client->as->io->fd);
+
+  SSL_set_fd(srv->ssl, c_soc);
 
   int accept = SSL_accept(srv->ssl);
   check(accept > 0, "Could not accept request: fatal error : %d",
@@ -176,6 +210,13 @@ AsocSSL *AsocSSL_Accept(AsocSSL *srv) {
   check(accept != 0, "Could not accept request: %d",
         SSL_get_error(srv->ssl, 0));
 
+  client->as->host = bfromcstr(inet_ntoa(client->as->addr.sin_addr));
+  client->as->port = bformat("%d", client->as->addr.sin_port);
+
+  client->as->io = NewIoStream(c_soc, SSLFD, 1024 * 10);
+  client->as->io->ssl = srv->ssl;
+  client->as->ssl = srv->ssl;
+  client->ssl = srv->ssl;
   return client;
 error:
   return NULL;

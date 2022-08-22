@@ -1,6 +1,7 @@
 #ifndef WEBSERVER_H_
 #define WEBSERVER_H_
 
+#include "dbg_a.h"
 #include "request.h"
 #include "soc.h"
 #include "ssl.h"
@@ -19,11 +20,18 @@ typedef struct Webserver {
   TriTree *urls;
   bool terminate;
   int type;
-  union sock {
-    Asoc *http;
-    AsocSSL *https;
-  } sock;
+  void *sock;
+  int port;
+  bstring host;
+  pthread_t main;
+  pthread_t *thread_pool;
+  int current_threads;
 } Webserver;
+
+typedef struct Webserver_T_Data {
+  Webserver *srv;
+  void *client;
+} Webserver_T_Data;
 
 Webserver *Webserver_New(int type, TriTree *urls, int port, bstring host,
                          AsocSSLConfig *conf);
