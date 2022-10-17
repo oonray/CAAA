@@ -31,6 +31,7 @@ List *List_New();
 List_Element *List_Element_New(size_t size,void *data);
 
 void List_Destroy(List *arr);
+void List_Element_Destroy(List *arr);
 List_Element *Find_List_Element(List_Element *ell,int i);
 
 int List_Clear(List *arr);
