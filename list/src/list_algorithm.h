@@ -1,0 +1,6 @@
+#ifndef VECTOR_ALGORITHM_H_
+#define VECTOR_ALGORITHM_H_
+
+
+
+#endif // VECTOR_ALGORITHM_H_

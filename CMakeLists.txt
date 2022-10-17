@@ -59,6 +59,19 @@ target_include_directories(vector_tests PRIVATE ${inc_src} "dbg/")
 add_test(NAME vector_test
          COMMAND vector_tests)
 
+# List
+add_library(list_obj OBJECT list/src/list.c)
+add_library(list $<TARGET_OBJECTS:list_obj>)
+target_include_directories(list_obj PRIVATE ${inc_src} "dbg/")
+add_dependencies(list bstring)
+install(TARGETS list)
+
+add_executable(list_tests vector/tests/vector_tests.c vector/tests/munit.c)
+target_link_libraries(list_tests PRIVATE vector)
+target_include_directories(list_tests PRIVATE ${inc_src} "dbg/")
+add_test(NAME list_test
+         COMMAND list_tests)
+
 # Map
 add_library(map_obj OBJECT map/src/map.c)
 add_library(map $<TARGET_OBJECTS:map_obj>)
