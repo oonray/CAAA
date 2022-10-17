@@ -1,18 +1,27 @@
-#include <arpa/inet.h>
-#include <fcntl.h>
-#include <netdb.h>
-#include <openssl/ssl.h>
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+#if defined(WIN32) && !defined(UNIX)
+//#include <iphlpapi.h>
+//#include <ws2tcpip.h>
+#include <io.h>
+
+#elif defined(UNIX) && !defined(WIN32)
+#include <arpa/inet.h>
+#include <netdb.h>
 #include <sys/select.h>
 #include <sys/socket.h>
-#include <sys/stat.h>
-#include <sys/types.h>
 #include <sys/uio.h>
 #include <unistd.h>
+#endif
+
+#include <fcntl.h>
+#include <stdbool.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 #ifdef _WITH_OPEN_SSL
+#include <openssl/ssl.h>
 #include <openssl/ssl3.h>
 #endif
 
@@ -30,18 +39,26 @@
 
 #define CREATE_RW O_RDWR | O_CREAT
 
-enum Descriptors { INN, OUT, ERR };
+enum Descriptors { INN, OUT_D, ERR };
 
 static struct tagbstring NL = bsStatic("\n");
 static struct tagbstring CRLF = bsStatic("\n\r");
 
+// open
+#if defined(UNIX) && !defined(WIN32)
+#define _open open
+#define _close close
+#define _fileno fileno
+#endif
 // regular open file
 typedef size_t (*fileReader)(int, void *, size_t);
 typedef size_t (*fileWriter)(int, const void *, size_t);
 
 // socket
+#if defined(UNIX) && !defined(WIN32)
 typedef ssize_t (*sockReader)(int, void *, size_t, int);
 typedef ssize_t (*sockWriter)(int, const void *, size_t, int);
+#endif
 
 #ifdef _WITH_OPEN_SSL
 // if openssl
@@ -55,13 +72,14 @@ typedef struct ioStream {
   RingBuffer *in;
   void *reader;
   void *writer;
+  void *opener;
 #ifdef _WITH_OPEN_SSL
   SSL *ssl;
 #endif
 } ioStream;
 
 ioStream *NewIoStream(int fd, int fd_t, size_t buf_t);
-ioStream *NewIoStreamFile(bstring path, int flags, int buf_t);
+ioStream *NewIoStreamFile(bstring path, int flags, int mode, int buf_t);
 ioStream *NewIoStreamSocket(int inet, int type, int FD, int buf_t);
 
 ioStream *NewIoStreamFromFILE(FILE *fp, int buf_t);
@@ -75,10 +93,12 @@ int IoStreamIoWrite(ioStream *str);
 bstring IoStreamBuffRead(ioStream *str);
 int IoStreamBuffWrite(ioStream *str, bstring input);
 
+#if defined(UNIX) && !defined(WIN32)
 // File Operations
 int IoFileStream_FileExists(bstring file);
 int IoFileStream_FileCreate(bstring file, mode_t mode);
 int IoFileStream_DirectoryExists(bstring directory);
 int IoFileStream_DirectoryCreate(bstring directory, mode_t mode);
+#endif
 
 #endif

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(CAAA VERSION 1.0)
+project(CAAA VERSION 1.0 LANGUAGES "C")
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 enable_testing()
@@ -93,92 +93,93 @@ add_test(NAME list_test
  add_test(NAME map_test
           COMMAND map_tests)
 
-#  # Stack
-#  add_library(stack_obj OBJECT stack/src/stack.c)
-#  add_library(stack $<TARGET_OBJECTS:stack_obj>)
-#  target_link_libraries(stack PRIVATE vector)
-#  target_include_directories(stack_obj PRIVATE ${inc_src} "dbg/")
-#  install(TARGETS stack)
-#  add_dependencies(stack vector)
+  # Stack
+  add_library(stack_obj OBJECT stack/src/stack.c)
+  add_library(stack $<TARGET_OBJECTS:stack_obj>)
+  target_link_libraries(stack PRIVATE vector)
+  target_include_directories(stack_obj PRIVATE ${inc_src} "dbg/")
+  install(TARGETS stack)
+  add_dependencies(stack vector)
 
-#  add_executable(stack_tests stack/tests/stack_tests.c stack/tests/munit.c)
-#  target_include_directories(stack_tests BEFORE PRIVATE ${inc_src} "dbg/")
-#  target_link_libraries(stack_tests PRIVATE stack)
-#  add_test(NAME stack_test
-#           COMMAND stack_tests)
+  add_executable(stack_tests stack/tests/stack_tests.c stack/tests/munit.c)
+  target_include_directories(stack_tests BEFORE PRIVATE ${inc_src} "dbg/")
+  target_link_libraries(stack_tests PRIVATE stack)
+  add_test(NAME stack_test
+           COMMAND stack_tests)
 
-#  #queue
-#  add_library(queue_obj OBJECT queue/src/queue.c)
-#  add_library(queue $<TARGET_OBJECTS:queue_obj>)
-#  target_link_libraries(queue PRIVATE vector)
-#  target_include_directories(queue_obj PRIVATE ${inc_src} "dbg/")
-#  install(TARGETS queue)
-#  add_dependencies(queue vector)
+  #queue
+  add_library(queue_obj OBJECT queue/src/queue.c)
+  add_library(queue $<TARGET_OBJECTS:queue_obj>)
+  target_link_libraries(queue PRIVATE vector)
+  target_include_directories(queue_obj PRIVATE ${inc_src} "dbg/")
+  install(TARGETS queue)
+  add_dependencies(queue vector)
 
-#  add_executable(queue_tests queue/tests/queue_tests.c queue/tests/munit.c)
-#  target_include_directories(queue_tests BEFORE PRIVATE ${inc_src} "dbg/")
-#  target_link_libraries(queue_tests PRIVATE queue)
-#  add_test(NAME queue_test
-#           COMMAND queue_tests)
+  add_executable(queue_tests queue/tests/queue_tests.c queue/tests/munit.c)
+  target_include_directories(queue_tests BEFORE PRIVATE ${inc_src} "dbg/")
+  target_link_libraries(queue_tests PRIVATE queue)
+  add_test(NAME queue_test
+           COMMAND queue_tests)
 
-#  #ringbuffer
-#  add_library(ringbuffer_obj OBJECT ringbuffer/src/ringbuffer.c)
-#  add_library(ringbuffer $<TARGET_OBJECTS:ringbuffer_obj>)
-#  target_link_libraries(ringbuffer PRIVATE vector bstring)
-#  target_include_directories(ringbuffer_obj PRIVATE ${inc_src} "dbg/")
-#  install(TARGETS ringbuffer)
-#  add_dependencies(ringbuffer vector)
-#  add_dependencies(ringbuffer bstring)
+  #ringbuffer
+  add_library(ringbuffer_obj OBJECT ringbuffer/src/ringbuffer.c)
+  add_library(ringbuffer $<TARGET_OBJECTS:ringbuffer_obj>)
+  target_link_libraries(ringbuffer PRIVATE vector bstring)
+  target_include_directories(ringbuffer_obj PRIVATE ${inc_src} "dbg/")
+  install(TARGETS ringbuffer)
+  add_dependencies(ringbuffer vector)
+  add_dependencies(ringbuffer bstring)
 
 
-#  add_executable(ringbuffer_tests ringbuffer/tests/reingbuffer_tests.c ringbuffer/tests/munit.c ringbuffer/src/ringbuffer.c)
-#  target_include_directories(ringbuffer_tests BEFORE PRIVATE ${inc_src} "dbg/")
-#  target_link_libraries(ringbuffer_tests PRIVATE ringbuffer)
-#  add_test(NAME ringbuffer_test
-#           COMMAND ringbuffer_tests)
+  add_executable(ringbuffer_tests ringbuffer/tests/reingbuffer_tests.c ringbuffer/tests/munit.c ringbuffer/src/ringbuffer.c)
+  target_include_directories(ringbuffer_tests BEFORE PRIVATE ${inc_src} "dbg/")
+  target_link_libraries(ringbuffer_tests PRIVATE ringbuffer)
+  add_test(NAME ringbuffer_test
+           COMMAND ringbuffer_tests)
 
-#  #titree
-#  add_library(tritree_obj OBJECT tritree/src/tritree.c)
-#  add_library(tritree $<TARGET_OBJECTS:tritree_obj> )
-#  target_link_libraries(tritree PRIVATE vector bstring)
-#  target_include_directories(tritree_obj PRIVATE ${inc_src} "dbg/")
-#  install(TARGETS tritree)
-#  add_dependencies(tritree vector)
+  #titree
+  add_library(tritree_obj OBJECT tritree/src/tritree.c)
+  add_library(tritree $<TARGET_OBJECTS:tritree_obj> )
+  target_link_libraries(tritree PRIVATE vector bstring)
+  target_include_directories(tritree_obj PRIVATE ${inc_src} "dbg/")
+  install(TARGETS tritree)
+  add_dependencies(tritree vector)
 
-#  add_executable(tritree_tests tritree/tests/tritree_tests.c tritree/tests/munit.c)
-#  target_include_directories(tritree_tests BEFORE PRIVATE ${inc_src} "dbg/")
-#  target_link_libraries(tritree_tests tritree)
-#  add_test(NAME tritree_test
-#           COMMAND tritree_tests)
+  add_executable(tritree_tests tritree/tests/tritree_tests.c tritree/tests/munit.c)
+  target_include_directories(tritree_tests BEFORE PRIVATE ${inc_src} "dbg/")
+  target_link_libraries(tritree_tests tritree)
+  add_test(NAME tritree_test
+           COMMAND tritree_tests)
 
-#  #bintree
-#  add_library(bintree_obj OBJECT bintree/src/bintree.c)
-#  add_library(bintree $<TARGET_OBJECTS:bintree_obj>)
-#  target_include_directories(bintree_obj PRIVATE ${inc_src} "dbg/")
-#  target_link_libraries(bintree PRIVATE vector bstring)
-#  install(TARGETS bintree)
-#  add_dependencies(bintree vector)
+  #bintree
+  add_library(bintree_obj OBJECT bintree/src/bintree.c)
+  add_library(bintree $<TARGET_OBJECTS:bintree_obj>)
+  target_include_directories(bintree_obj PRIVATE ${inc_src} "dbg/")
+  target_link_libraries(bintree PRIVATE vector bstring)
+  install(TARGETS bintree)
+  add_dependencies(bintree vector)
 
-#  add_executable(bintree_tests bintree/tests/bintree_tests.c bintree/tests/munit.c)
-#  target_include_directories(bintree_tests BEFORE PRIVATE ${inc_src} "dbg/")
-#  target_link_libraries(bintree_tests PRIVATE bintree)
-#  add_test(NAME bintree_test
-#           COMMAND bintree_tests)
+  add_executable(bintree_tests bintree/tests/bintree_tests.c bintree/tests/munit.c)
+  target_include_directories(bintree_tests BEFORE PRIVATE ${inc_src} "dbg/")
+  target_link_libraries(bintree_tests PRIVATE bintree)
+  add_test(NAME bintree_test
+           COMMAND bintree_tests)
 
-#  #fileio
-#  add_library(fileio_obj OBJECT io/src/fileio.c)
-#  add_library(fileio $<TARGET_OBJECTS:fileio_obj>)
-#  target_include_directories(fileio_obj PRIVATE ${inc_src} "dbg/")
-#  target_link_libraries(fileio PRIVATE bstring ringbuffer)
+  #fileio
+  add_library(fileio_obj OBJECT io/src/fileio.c)
+  add_library(fileio $<TARGET_OBJECTS:fileio_obj>)
+  target_include_directories(fileio_obj PRIVATE ${inc_src} "dbg/")
 
-#  install(TARGETS fileio)
-#  add_dependencies(fileio ringbuffer)
+  target_link_libraries(fileio PRIVATE bstring ringbuffer)
 
-#  add_executable(io_tests io/tests/fileio_test.c io/tests/munit.c)
-#  target_include_directories(io_tests PRIVATE ${inc_src} "dbg/")
-#  target_link_libraries(io_tests PRIVATE fileio)
-#  add_test(NAME io_tests
-#           COMMAND io_tests)
+  install(TARGETS fileio)
+  add_dependencies(fileio ringbuffer)
+
+  add_executable(io_tests io/tests/fileio_test.c io/tests/munit.c)
+  target_include_directories(io_tests PRIVATE ${inc_src} "dbg/")
+  target_link_libraries(io_tests PRIVATE fileio)
+  add_test(NAME io_tests
+           COMMAND io_tests)
 
 #  #io SSL
 #  add_library(fileio_ssl_obj OBJECT io/src/fileio.c)

@@ -12,20 +12,21 @@ ioStream *NewIoStream(int fd, int fd_t, size_t buf_t) {
   out->fd_t = fd_t;
 
   switch (fd_t) {
+#if defined(UNIX) && !defined(WIN32)
   case SOCKFD:
     out->reader = &recv;
     out->writer = &send;
     break;
-#ifdef _WITH_OPEN_SSL
+#elif defined(_WITH_OPEN_SSL)
   case SSLFD:
     out->reader = &SSL_read;
     out->writer = &SSL_write;
     break;
 #endif
   default:
-    out->reader = &read;
-    out->writer = &write;
-    break;
+    out->reader = _read;
+    out->writer = _write;
+  break;
   }
 
   out->in = RingBuffer_New(b_size);
@@ -36,9 +37,9 @@ error:
   return NULL;
 }
 
-ioStream *NewIoStreamFile(bstring path, int flags, int buf_t) {
+ioStream *NewIoStreamFile(bstring path, int flags, int mode, int buf_t) {
   const char *pt = bdata(path);
-  int fd = open(pt, flags);
+  int fd = _open(pt, flags, mode);
   check(fd >= 0, "Could not open file %s", bdata(path));
   return NewIoStream(fd, FILEFD, buf_t);
 error:
@@ -46,13 +47,14 @@ error:
 }
 
 ioStream *NewIoStreamFromFILE(FILE *fp, int buf_t) {
-  int fd = fileno(fp);
+  int fd = _fileno(fp);
   ioStream *stream = NewIoStream(fd, FILEFD, buf_t);
   return stream;
 error:
   return NULL;
 }
 
+#if defined(UNIX) && !defined(WIN32)
 ioStream *NewIoStreamSocket(int inet, int type, int FD, int buf_t) {
   int fd = socket(inet, type, 0);
   check(fd != 0, "Could not open file");
@@ -61,6 +63,7 @@ error:
   return NULL;
 }
 
+#if defined(UNIX) && !defined(WIN32)
 ioStream *NewIoStreamSocketSOC(int inet, int type, int buf_t, void *ssl) {
   ioStream *stream = NewIoStreamSocket(inet, type, SOCKFD, buf_t);
 #ifdef _WITH_OPEN_SSL
@@ -69,6 +72,8 @@ ioStream *NewIoStreamSocketSOC(int inet, int type, int buf_t, void *ssl) {
 #endif
   return stream;
 }
+#endif
+#endif
 
 #ifdef ASOC_SSL_H_
 ioStream *NewIoStreamSocketSSL(SSL *ssl, int inet, int type, int buf_t) {
@@ -83,7 +88,7 @@ error:
 
 void DestroyIoStream(ioStream *io) {
   if (io != NULL) {
-    close(io->fd);
+    _close(io->fd);
     RingBuffer_Destroy(io->in);
     free(io);
   }
@@ -95,11 +100,13 @@ int IoStreamIoRead(ioStream *str) {
     str->in->start = str->in->end = 0;
   }
 
+#if defined(UNIX)
   if (str->fd_t == SOCKFD) {
     sockReader r = (sockReader)str->reader;
     rc = r(str->fd, RingBuffer_Starts_At(str->in),
            RingBuffer_Avaliable_Space(str->in), 0);
   }
+#endif
 
 #ifdef _WITH_OPEN_SSL
   if (str->fd_t == SSLFD) {
@@ -130,11 +137,13 @@ error:
 int IoStreamIoWrite(ioStream *str) {
   int rc = 0;
 
+#if defined(UNIX) && !defined(WIN32)
   if (str->fd_t == SOCKFD) {
     sockWriter w = (sockWriter)str->writer;
     rc = w(str->fd, RingBuffer_Starts_At(str->in),
            RingBuffer_Avaliable_Data(str->in), 0);
   }
+#endif
 
 #ifdef _WITH_OPEN_SSL
   if (str->fd_t == SSLFD) {
@@ -187,6 +196,8 @@ error:
   return -1;
 }
 
+
+#if defined(UNIX) && !defined(WIN32)
 int IoFileStream_FileExists(bstring file) {
   struct stat st;
   int rc = stat(file->data, &st);
@@ -223,3 +234,4 @@ error:
   close(fd);
   return -1;
 }
+#endif

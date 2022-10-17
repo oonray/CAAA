@@ -9,7 +9,8 @@ struct tagbstring content = bsStatic("loremipsumsetdoloramet");
 
 MunitResult test_new_file(const MunitParameter params[],
                           void *user_data_or_fixture) {
-  ioStream *stream = NewIoStreamFile(&file, CREATE_RW | 0766, 1024 * 10);
+  ioStream *stream =
+      NewIoStreamFile(&file, _O_CREAT | _O_RDWR, 0765, 1024 * 10);
   check(stream != NULL, "Could not create Stream %s", bdata(&file));
   DestroyIoStream(stream);
   return MUNIT_OK;
@@ -17,6 +18,7 @@ error:
   return MUNIT_FAIL;
 }
 
+#if defined(UNIX)
 MunitResult test_new_socket(const MunitParameter params[],
                             void *user_data_or_fixture) {
   ioStream *stream = NewIoStreamSocket(AF_INET, SOCK_STREAM, SOCKFD, 1024 * 10);
@@ -26,6 +28,7 @@ MunitResult test_new_socket(const MunitParameter params[],
 error:
   return MUNIT_FAIL;
 }
+#endif
 
 MunitResult test_new_std(const MunitParameter params[],
                          void *user_data_or_fixture) {
@@ -39,7 +42,7 @@ error:
 
 MunitResult test_file_read_write(const MunitParameter params[],
                                  void *user_data_or_fixture) {
-  ioStream *stream = NewIoStreamFile(&file, O_RDWR, 1024 * 10);
+  ioStream *stream = NewIoStreamFile(&file, O_RDWR, 0765, 1024 * 10);
   check(stream != NULL, "Could not create Stream %s", bdata(&file));
 
   int rc = IoStreamBuffWrite(stream, &content);
@@ -50,7 +53,7 @@ MunitResult test_file_read_write(const MunitParameter params[],
   check(rc > 0, "Could not write to io");
   DestroyIoStream(stream);
 
-  stream = NewIoStreamFile(&file, O_RDWR, 1024 * 10);
+  stream = NewIoStreamFile(&file, O_RDWR, 0765, 1024 * 10);
   check(stream != NULL, "Could not open file %s", bdata(&file));
 
   rc = IoStreamIoRead(stream);
@@ -66,14 +69,17 @@ error:
 
 int main(int argc, char *argv[]) {
   MunitTest tests[] = {
-      {" test_new_file", test_new_file, NULL, NULL, MUNIT_TEST_OPTION_NONE,
-       NULL},
-      {" test_new_sock", test_new_socket, NULL, NULL, MUNIT_TEST_OPTION_NONE,
-       NULL},
-      {" test_new_std", test_new_std, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
-      {" test_file_read_write", test_file_read_write, NULL, NULL,
-       MUNIT_TEST_OPTION_NONE, NULL},
-      {NULL, NULL, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL}};
+    {" test_new_file", test_new_file, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
+
+#if defined(UNIX)
+    {" test_new_sock", test_new_socket, NULL, NULL, MUNIT_TEST_OPTION_NONE,
+     NULL},
+#endif
+    {" test_new_std", test_new_std, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
+    {" test_file_read_write", test_file_read_write, NULL, NULL,
+     MUNIT_TEST_OPTION_NONE, NULL},
+    {NULL, NULL, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL}
+  };
 
   const MunitSuite suite = {"IO Tests", tests, NULL, 1,
                             MUNIT_SUITE_OPTION_NONE};
