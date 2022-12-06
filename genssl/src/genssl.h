@@ -1,8 +1,8 @@
 #ifndef GENSSL_H_
 #define GENSSL_H_
 
-#include "dbg.h"
 #include "ssl.h"
+#include <caaa/dbg.h>
 #include <openssl/ossl_typ.h>
 #include <openssl/pem.h>
 #include <openssl/rsa.h>
