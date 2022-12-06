@@ -1,6 +1,7 @@
 #include "fileio.h"
 #include "bstrlib.h"
 #include <stddef.h>
+#include <sys/stat.h>
 
 ioStream *NewIoStream(int fd, int fd_t, size_t buf_t) {
   ioStream *out = calloc(1, sizeof(ioStream));
@@ -38,8 +39,17 @@ error:
 
 ioStream *NewIoStreamFile(bstring path, int flags, int buf_t) {
   const char *pt = bdata(path);
-  int fd = open(pt, flags);
+  struct stat sb;
+  int fd = 0;
+
+  int st = stat(pt, &sb);
+  if (st == 0) {
+    fd = open(pt, flags);
+  } else {
+    fd = creat(pt, flags);
+  }
   check(fd >= 0, "Could not open file %s", bdata(path));
+
   return NewIoStream(fd, FILEFD, buf_t);
 error:
   return NULL;

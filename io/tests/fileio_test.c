@@ -9,7 +9,7 @@ struct tagbstring content = bsStatic("loremipsumsetdoloramet");
 
 MunitResult test_new_file(const MunitParameter params[],
                           void *user_data_or_fixture) {
-  ioStream *stream = NewIoStreamFile(&file, CREATE_RW | 0766, 1024 * 10);
+  ioStream *stream = NewIoStreamFile(&file, O_RDWR | 0666, 1024 * 10);
   check(stream != NULL, "Could not create Stream %s", bdata(&file));
   DestroyIoStream(stream);
   return MUNIT_OK;
