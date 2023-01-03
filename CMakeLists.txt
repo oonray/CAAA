@@ -266,3 +266,22 @@ target_include_directories(genssl_tests PRIVATE ${inc_src} "dbg/")
 target_link_libraries(genssl_tests PRIVATE genssl)
 add_test(NAME genssl_tests
          COMMAND genssl_tests)
+
+#crypto
+## XOR
+add_library(crypto_xor_obj OBJECT crypto/xor/xor.c)
+target_include_directories(crypto_xor_obj  PRIVATE ${inc_src} "dbg/")
+
+add_library(xor $<TARGET_OBJECTS:crypto_xor_obj>)
+target_link_libraries(xor PRIVATE fileio)
+
+install(TARGETS xor)
+add_dependencies(xor fileio)
+
+#tests
+add_executable(crypto_tests crypto/tests/crypto_tests.c crypto/tests/munit.c)
+target_include_directories(crypto_tests PRIVATE ${inc_src} "dbg/")
+target_include_directories(crypto_tests PRIVATE ${inc_src} "crypto/xor")
+target_link_libraries(crypto_tests PRIVATE xor)
+add_test(NAME crypto_tests
+         COMMAND crypto_tests)

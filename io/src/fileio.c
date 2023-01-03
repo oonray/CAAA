@@ -190,6 +190,7 @@ int IoStreamBuffWrite(ioStream *str, bstring input) {
 
   check(rc != 0, "Failed to read form %s",
         str->fd_t == SOCKFD ? "Socket" : "File");
+
   RingBuffer_Commit_Write(str->in, rc);
 
   return rc;

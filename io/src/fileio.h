@@ -26,6 +26,7 @@
 
 #define SOCKFD 0x01
 #define FILEFD 0x03
+#define STRINGFD 0x05
 #define SSLFD 0x11
 
 #define CREATE_RW O_RDWR | O_CREAT
