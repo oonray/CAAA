@@ -8,7 +8,8 @@
 #include <string.h>
 
 typedef struct {
-  bstring buffer;
+  char *buffer; // Changed from Bstring
+  // WARN: if errors check here
   int length;
   int start;
   int end;

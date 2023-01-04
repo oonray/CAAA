@@ -5,12 +5,16 @@
 #include "dbg.h"
 #include "fileio.h"
 
+typedef ioStream *(*xor_key)(int size);
+
 typedef struct XOR {
-  ioStream *key;
-  ioStream *in;
-  ioStream *out;
+  xor_key key;
 } XOR;
 
 ioStream *xor_default_key(int size);
-XOR *XORNew();
+XOR *XORNew(xor_key key);
+
+ioStream *XOR_encrypt(XOR *x, ioStream *data);
+#define XOR_decrypt(X, D) XOR_encrypt(X, D)
+
 #endif // XOR_H_
