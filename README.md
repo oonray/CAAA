@@ -9,4 +9,4 @@ C has been said to not be a Batteries included Library, So i made some Tripple A
 * Code is the result of me reading Learn C the hard way by Zed Shaw.
 * depends [bstrlib](https://github.com/websnarf/bstrlib)
 * depends [tomlc99](https://github.com/cktan/tomlc99)
-* depends [gnulib/base64](https://github.com/coreutils/gnulib)
+https://wiki.openssl.org/index.php/Base64
