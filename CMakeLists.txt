@@ -278,20 +278,11 @@ target_link_libraries(xor PRIVATE fileio)
 install(TARGETS xor)
 add_dependencies(xor fileio)
 
-## Base64
-add_library(crypto_base64_obj OBJECT crypto/base64/base64.c)
-target_include_directories(crypto_base64_obj  PRIVATE ${inc_src} "dbg/")
-
-add_library(base64 $<TARGET_OBJECTS:crypto_base64_obj>)
-
-install(TARGETS base64)
-
 #tests
 add_executable(crypto_tests crypto/tests/crypto_tests.c crypto/tests/munit.c)
 target_include_directories(crypto_tests PRIVATE ${inc_src} "dbg/")
 target_include_directories(crypto_tests PRIVATE ${inc_src} "crypto/xor")
 target_link_libraries(crypto_tests PRIVATE xor)
-target_link_libraries(crypto_tests PRIVATE base64)
 
 add_test(NAME crypto_tests
          COMMAND crypto_tests)

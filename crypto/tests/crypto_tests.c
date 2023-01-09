@@ -2,7 +2,7 @@
 #include "dbg.h"
 #include "munit.h"
 #include "ringbuffer.h"
-#include <curl/base64.h>
+//#include <curl/base64.h>
 
 #ifndef XOR_H_
 #include "xor.h"
@@ -50,19 +50,19 @@ MunitResult test_encrypt(const MunitParameter params[],
   check(bstrcmp(out_s, chk_s),
         "Strings are not the same after decrypt got [%s]", bdata(chk_s));
 
-  return MUNIT_OK
+  return MUNIT_OK;
+error:
+  return MUNIT_FAIL;
+}
 
-      int
-      main(int argc, char *argv[]) {
-    MunitTest tests[] = {
-        {" test_new_key", test_new_key, NULL, NULL, MUNIT_TEST_OPTION_NONE,
-         NULL},
-        {" test_encrypt", test_encrypt, NULL, NULL, MUNIT_TEST_OPTION_NONE,
-         NULL},
-        {NULL, NULL, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL}};
+int main(int argc, char *argv[]) {
+  MunitTest tests[] = {
+      {" test_new_key", test_new_key, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
+      {" test_encrypt", test_encrypt, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
+      {NULL, NULL, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL}};
 
-    const MunitSuite suite = {"IO Tests", tests, NULL, 1,
-                              MUNIT_SUITE_OPTION_NONE};
+  const MunitSuite suite = {"IO Tests", tests, NULL, 1,
+                            MUNIT_SUITE_OPTION_NONE};
 
-    return munit_suite_main(&suite, NULL, 0, NULL);
-  }
+  return munit_suite_main(&suite, NULL, 0, NULL);
+}
