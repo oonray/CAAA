@@ -50,4 +50,6 @@ void Argparse_Print_Help(ArgumentParser *args);
 #define ArgIntData(A) atoi(bdata((A)))
 #define ArgStrData(A) (A)
 
+void ArgParseDefault(void *value, void *data);
+
 #endif // ARGPARSE_H_

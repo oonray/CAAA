@@ -135,6 +135,8 @@ int Argparse_Parse(ArgumentParser *parser, int argc, char *argv[]) {
     arg_t->value = value;
     i++;
   }
+
+  TriTree_Traverse(parser->args_n, ArgParseDefault, NULL);
   return 0;
 error:
   return 1;
@@ -154,4 +156,8 @@ void Argparse_Print_Help(ArgumentParser *args) {
   printf("\n");
 }
 
-#define ArgparseDefault(A) (if (A->value == NULL) { A->value = A->def; })
+void ArgParseDefault(void *value, void *data) {
+  Argument *arg = (Argument *)value;
+  if (arg->value == NULL)
+    arg->value = arg->def;
+}

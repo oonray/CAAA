@@ -31,6 +31,7 @@ MunitResult test_add_arg(const MunitParameter params[],
   Argparse_Add_Bool(argparser, "-s", "sum", "", "Wether to sum the data");
   Argparse_Add_String(argparser, "-ss", "summing", "no",
                       "Wether to sum the data");
+  Argparse_Add_String(argparser, "-ssp", "solo", "hello", "test default");
 
   return MUNIT_OK;
 error:
@@ -71,6 +72,10 @@ MunitResult test_get(const MunitParameter params[],
   check(bstrcmp(summing->value, bfromcstr("no") == 0),
         "Value Recieved Wrong: got %s", bdata(summing->value));
 
+  Argument *def = Argparse_Get(argparser, bfromcstr("solo"));
+  check(data1 != NULL, "Could not find data");
+  check(bstrcmp(summing->value, bfromcstr("hello") == 0),
+        "Value Recieved Wrong: got %s", bdata(summing->value));
   return MUNIT_OK;
 error:
   return MUNIT_FAIL;
