@@ -53,19 +53,20 @@ MunitResult test_get(const MunitParameter params[],
   check(argparser != NULL, "Could not create data");
   test_add_arg(params, user_data_or_fixture);
 
-  Argparse_Parse(argparser, argc, args);
+  check(Argparse_Parse(argparser, argc, args) == 0, "Could not parse data");
+  log_info("Data Parsed");
 
-  Argument *data1 = Argparse_Get(argparser, "data1");
+  Argument *data1 = Argparse_Get(argparser, bfromcstr("data1"));
   check(data1 != NULL, "Could not find data");
   check(bstrcmp(data1->value, bfromcstr("5")), "Value Recieved Wrong: got %s",
         bdata(data1->value));
 
-  Argument *sum = Argparse_Get(argparser, "sum");
+  Argument *sum = Argparse_Get(argparser, bfromcstr("sum"));
   check(data1 != NULL, "Could not find data");
-  check(bstrcmp(sum->value, bfromcstr("true")), "Value Recieved Wrong: got %s",
-        bdata(sum->value));
+  check(bstrcmp(sum->value, bfromcstr("true")) == 0,
+        "Value Recieved Wrong: got %s", bdata(sum->value));
 
-  Argument *summing = Argparse_Get(argparser, "summing");
+  Argument *summing = Argparse_Get(argparser, bfromcstr("summing"));
   check(data1 != NULL, "Could not find data");
   check(bstrcmp(summing->value, bfromcstr("no")),
         "Value Recieved Wrong: got %s", bdata(summing->value));

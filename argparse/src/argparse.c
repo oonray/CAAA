@@ -103,35 +103,50 @@ error:
 }
 
 int Argparse_Parse(ArgumentParser *parser, int argc, char *argv[]) {
-  parser->progname = bfromcstr(argv[0]);
-  for (int i = 0; i < argc; i++) {
-    bstring token = bfromcstr(argv[i]);
-    if (token->data[0] == '-') {
-      if (bstrcmp(token, bfromcstr("-h")) == 0) {
-        Argparse_Print_Help(parser);
-      }
+  check(argc > 0, "Argc too small");
+  check(argv != NULL, "No argv");
 
-      Argument *arg = Argparse_Find(parser, bdata(token));
-      if (arg != NULL) {
-        if (bstrcmp(arg->type, bfromcstr("bool")) == 0) {
-          ++i;
-          arg->value = bfromcstr(argv[i]);
-        } else {
-          arg->value = bfromcstr("true");
-        }
-      }
+  parser->progname = bfromcstr(argv[0]);
+
+  for (int i = 1; i < argc; i++) {
+    bstring token = bfromcstr(argv[i]);
+    bstring value = bfromcstr(argv[i + 1]);
+
+    log_info("[token]%s:[value]%s", bdata(token), bdata(value));
+
+    if (token->data[0] != '-') {
+      // token not folaf format
+      log_info("Continue");
+      continue;
     }
+
+    if (bstrcmp(token, bfromcstr("-h")) == 0) {
+      Argparse_Print_Help(parser);
+      return 1;
+    }
+
+    Argument *arg_t = Argparse_Find(parser, token);
+    if (arg_t == NULL) {
+      continue;
+    }
+
+    int is_bool = bstrcmp(arg_t->type, bfromcstr("bool"));
+    if (is_bool != 0) {
+      arg_t->value = value;
+      i++;
+    }
+    arg_t->value = bfromcstr("true");
   }
+  return 0;
+error:
   return 1;
 }
 
-Argument *Argparse_Get(ArgumentParser *args, char *name) {
-  bstring name_b = bfromcstr(name);
-  return TriTree_Search(args->args_n, bdata(name_b), blength(name_b));
+Argument *Argparse_Get(ArgumentParser *args, bstring name) {
+  return TriTree_Search(args->args_n, bdata(name), blength(name));
 }
-Argument *Argparse_Find(ArgumentParser *args, char *token) {
-  bstring token_b = bfromcstr(token);
-  return TriTree_Search(args->args_n, bdata(token_b), blength(token_b));
+Argument *Argparse_Find(ArgumentParser *args, bstring token) {
+  return TriTree_Search(args->args_t, bdata(token), blength(token));
 }
 
 void Argparse_Print_Help(ArgumentParser *args) {

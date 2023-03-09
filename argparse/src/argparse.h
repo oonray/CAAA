@@ -42,8 +42,8 @@ int Argparse_Parse(ArgumentParser *parser, int argc, char *argv[]);
 void Argparse_Destroy(ArgumentParser *parser);
 void Argparse_Argument_Destroy(Argument *arg);
 
-Argument *Argparse_Get(ArgumentParser *args, char *name);
-Argument *Argparse_Find(ArgumentParser *args, char *token);
+Argument *Argparse_Get(ArgumentParser *args, bstring name);
+Argument *Argparse_Find(ArgumentParser *args, bstring token);
 void Argparse_Print_Help(ArgumentParser *args);
 
 #define ArgBoolData(A) bdata((A)) == "true" ? true : false
