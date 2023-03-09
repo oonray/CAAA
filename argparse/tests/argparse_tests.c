@@ -58,8 +58,8 @@ MunitResult test_get(const MunitParameter params[],
 
   Argument *data1 = Argparse_Get(argparser, bfromcstr("data1"));
   check(data1 != NULL, "Could not find data");
-  check(bstrcmp(data1->value, bfromcstr("5")), "Value Recieved Wrong: got %s",
-        bdata(data1->value));
+  check(bstrcmp(data1->value, bfromcstr("5") == 0),
+        "Value Recieved Wrong: got %s", bdata(data1->value));
 
   Argument *sum = Argparse_Get(argparser, bfromcstr("sum"));
   check(data1 != NULL, "Could not find data");
@@ -68,7 +68,7 @@ MunitResult test_get(const MunitParameter params[],
 
   Argument *summing = Argparse_Get(argparser, bfromcstr("summing"));
   check(data1 != NULL, "Could not find data");
-  check(bstrcmp(summing->value, bfromcstr("no")),
+  check(bstrcmp(summing->value, bfromcstr("no") == 0),
         "Value Recieved Wrong: got %s", bdata(summing->value));
 
   return MUNIT_OK;

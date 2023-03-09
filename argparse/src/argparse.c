@@ -127,11 +127,13 @@ int Argparse_Parse(ArgumentParser *parser, int argc, char *argv[]) {
     }
 
     int is_bool = bstrcmp(arg_t->type, bfromcstr("bool"));
-    if (is_bool != 0) {
-      arg_t->value = value;
-      i++;
+    if (is_bool == 0) {
+      arg_t->value = bfromcstr("true");
+      continue;
     }
-    arg_t->value = bfromcstr("true");
+
+    arg_t->value = value;
+    i++;
   }
   return 0;
 error:
