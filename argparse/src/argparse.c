@@ -153,3 +153,5 @@ void Argparse_Print_Help(ArgumentParser *args) {
   TriTree_Traverse(args->args_t, PrintArgs, NULL);
   printf("\n");
 }
+
+#define ArgparseDefault(A) (if (A->value == NULL) { A->value = A->def; })
