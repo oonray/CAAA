@@ -112,11 +112,7 @@ int Argparse_Parse(ArgumentParser *parser, int argc, char *argv[]) {
     bstring token = bfromcstr(argv[i]);
     bstring value = bfromcstr(argv[i + 1]);
 
-    log_info("[token]%s:[value]%s", bdata(token), bdata(value));
-
     if (token->data[0] != '-') {
-      // token not folaf format
-      log_info("Continue");
       continue;
     }
 
