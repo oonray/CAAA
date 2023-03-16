@@ -37,6 +37,7 @@ FILE(GLOB inc_src */src)
 include_directories(${inc_src})
 include_directories("dbg/")
 include_directories("inc/")
+include_directories("strings/")
 
 
 #openssl
@@ -57,7 +58,8 @@ install(TARGETS ca_string)
 
 
 # Vector
-add_library(vector_obj OBJECT vector/src/vector.c)
+
+add_library(vector_obj OBJECT vector/src/ca_vector.c)
 add_library(ca_vector $<TARGET_OBJECTS:vector_obj>)
 add_dependencies(ca_vector ca_string)
 install(TARGETS ca_vector)
@@ -67,41 +69,41 @@ target_link_libraries(vector_tests PRIVATE ca_vector ca_munit)
 add_test(NAME vector_test
          COMMAND vector_tests)
 
-#  # Map
-#  add_library(map_obj OBJECT map/src/map.c)
-#  add_library(map $<TARGET_OBJECTS:map_obj>)
-#  target_link_libraries(map PRIVATE ca_vector)
-#  add_dependencies(map ca_vector)
-#  install(TARGETS map)
+# Map
+add_library(map_obj OBJECT map/src/ca_map.c)
+add_library(ca_map $<TARGET_OBJECTS:map_obj>)
+target_link_libraries(ca_map PRIVATE ca_vector)
+add_dependencies(ca_map ca_vector)
+install(TARGETS ca_map)
 
-#  add_executable(map_tests map/tests/map_tests.c map/tests/munit.c $<TARGET_OBJECTS:map>)
-#  target_link_libraries(map_tests PRIVATE map ca_vector ca_string)
-#  add_test(NAME map_test
-#           COMMAND map_tests)
+add_executable(map_tests map/tests/map_tests.c)
+target_link_libraries(map_tests PRIVATE ca_map ca_vector ca_string ca_munit)
+add_test(NAME map_test
+         COMMAND map_tests)
 
-#  # Stack
-#  add_library(stack_obj OBJECT stack/src/stack.c)
-#  add_library(stack $<TARGET_OBJECTS:stack_obj>)
-#  target_link_libraries(stack PRIVATE ca_vector)
-#  install(TARGETS stack)
-#  add_dependencies(stack ca_vector)
+# Stack
+add_library(stack_obj OBJECT stack/src/ca_stack.c)
+add_library(ca_stack $<TARGET_OBJECTS:stack_obj>)
+target_link_libraries(ca_stack PRIVATE ca_vector)
+install(TARGETS ca_stack)
+add_dependencies(ca_stack ca_vector)
 
-#  add_executable(stack_tests stack/tests/stack_tests.c stack/tests/munit.c)
-#  target_link_libraries(stack_tests PRIVATE stack)
-#  add_test(NAME stack_test
-#           COMMAND stack_tests)
+add_executable(stack_tests stack/tests/stack_tests.c)
+target_link_libraries(stack_tests PRIVATE ca_stack ca_vector ca_munit)
+add_test(NAME stack_test
+         COMMAND stack_tests)
 
-#  #queue
-#  add_library(queue_obj OBJECT queue/src/queue.c)
-#  add_library(queue $<TARGET_OBJECTS:queue_obj>)
-#  target_link_libraries(queue PRIVATE ca_vector)
-#  install(TARGETS queue)
-#  add_dependencies(queue ca_vector)
+#queue
+add_library(queue_obj OBJECT queue/src/ca_queue.c)
+add_library(ca_queue $<TARGET_OBJECTS:queue_obj>)
+target_link_libraries(ca_queue PRIVATE ca_vector)
+install(TARGETS ca_queue)
+add_dependencies(ca_queue ca_vector)
 
-#  add_executable(queue_tests queue/tests/queue_tests.c queue/tests/munit.c)
-#  target_link_libraries(queue_tests PRIVATE queue)
-#  add_test(NAME queue_test
-#           COMMAND queue_tests)
+add_executable(queue_tests queue/tests/queue_tests.c)
+target_link_libraries(queue_tests PRIVATE ca_queue ca_munit)
+add_test(NAME queue_test
+         COMMAND queue_tests)
 
 #  #ringbuffer
 #  add_library(ringbuffer_obj OBJECT ringbuffer/src/ringbuffer.c)

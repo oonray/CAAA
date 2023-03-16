@@ -1,3 +1,4 @@
+#include <ca_vector.h>
 #include <munit/munit.h>
 
 MunitResult test_new(const MunitParameter params[],
