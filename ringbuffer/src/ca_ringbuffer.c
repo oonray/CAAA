@@ -1,7 +1,7 @@
-#include "ringbuffer.h"
+#include <ca_ringbuffer.h>
 
-RingBuffer *RingBuffer_New(int length) {
-  RingBuffer *buffer = (RingBuffer *)calloc(1, sizeof(RingBuffer));
+ca_ringbuffer *ca_ringbuffer_new(int length) {
+  ca_ringbuffer *buffer = (ca_ringbuffer *)calloc(1, sizeof(ca_ringbuffer));
   buffer->length = length + 1;
   buffer->start = 0;
   buffer->end = 0;
@@ -9,39 +9,38 @@ RingBuffer *RingBuffer_New(int length) {
   return buffer;
 }
 
-void RingBuffer_Destroy(RingBuffer *r) {
+void ca_ringbuffer_destroy(ca_ringbuffer *r) {
   if (r) {
     free(r->buffer);
     free(r);
   }
 }
 
-int RingBuffer_Write(RingBuffer *r, char *data, int length) {
-  if (RingBuffer_Avaliable_Data(r) == 0) {
+int ca_ringbuffer_write(ca_ringbuffer *r, char *data, int length) {
+  if (ca_ringbuffer_avaliable_data(r) == 0) {
     r->start = r->end = 0;
   }
 
-  check(length <= RingBuffer_Avaliable_Space(r),
-        "Not Enough Space: %d request, %d avaliable",
-        RingBuffer_Avaliable_Data(r), length);
-  void *result = memcpy(RingBuffer_Ends_At(r), data, length);
+  check(length <= ca_ringbuffer_avaliable_space(r),
+        "not enough space: %d request, %d avaliable",
+        ca_ringbuffer_avaliable_data(r), length);
+  void *result = memcpy(ca_ringbuffer_ends_at(r), data, length);
   check(result != NULL, "Failed To Write Data int buffer");
 
-  RingBuffer_Commit_Write(r, length);
+  ca_ringbuffer_commit_write(r, length);
   return length;
 
 error:
   return -1;
 }
 
-int RingBuffer_Read(RingBuffer *r, char *target, int amount) {
-  check(amount <= RingBuffer_Avaliable_Data(r),
+int ca_ringbuffer_Read(ca_ringbuffer *r, char *target, int amount) {
+  check(amount <= ca_ringbuffer_avaliable_data(r),
         "Not enough in the buffer: has %d, needs %d",
-        RingBuffer_Avaliable_Data(r), amount);
-  void *result = memcpy(target, RingBuffer_Starts_At(r), amount);
+        ca_ringbuffer_avaliable_data(r), amount);
+  void *result = memcpy(target, ca_ringbuffer_starts_at(r), amount);
   check(result != NULL, "Failed to write buffer into data.");
 
-  RingBuffer_Commit_Read(r, amount);
   if (r->end == r->start) {
     r->start = r->end = 0;
   }
@@ -51,17 +50,17 @@ error:
   return -1;
 }
 
-bstring RingBuffer_Gets(RingBuffer *r, int amount) {
+bstring ca_ringbuffer_gets(ca_ringbuffer *r, int amount) {
   check(amount > 0, "Need more than 0 for gets, you gave: %d", amount);
-  check(amount <= RingBuffer_Avaliable_Data(r), "Not enough in the buffer.");
+  check(amount <= ca_ringbuffer_avaliable_data(r), "not enough in the buffer.");
 
-  bstring result = blk2bstr(RingBuffer_Starts_At(r), amount);
+  bstring result = blk2bstr(ca_ringbuffer_starts_at(r), amount);
 
   check(result != NULL, "Failed to create result");
   check(blength(result) == amount, "Wrong length result");
 
-  RingBuffer_Commit_Read(r, amount);
-  check(RingBuffer_Avaliable_Data(r) >= 0, "Error in read commit");
+  ca_ringbuffer_commit_read(r, amount);
+  check(ca_ringbuffer_avaliable_data(r) >= 0, "error in read commit");
 
   return result;
 error:

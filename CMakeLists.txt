@@ -103,42 +103,41 @@ add_test(NAME queue_test
          COMMAND queue_tests)
 
 #ringbuffer
-add_library(ringbuffer_obj OBJECT ringbuffer/src/ringbuffer.c)
-add_library(ringbuffer $<TARGET_OBJECTS:ringbuffer_obj>)
-target_link_libraries(ringbuffer PRIVATE ca_vector ca_string)
-install(TARGETS ringbuffer)
-add_dependencies(ringbuffer ca_vector)
-add_dependencies(ringbuffer ca_string)
+add_library(ringbuffer_obj OBJECT ringbuffer/src/ca_ringbuffer.c)
+add_library(ca_ringbuffer $<TARGET_OBJECTS:ringbuffer_obj>)
+target_link_libraries(ca_ringbuffer PRIVATE ca_vector ca_string)
+install(TARGETS ca_ringbuffer)
+add_dependencies(ca_ringbuffer ca_vector ca_string)
 
 
-add_executable(ringbuffer_tests ringbuffer/tests/reingbuffer_tests.c ringbuffer/tests/munit.c ringbuffer/src/ringbuffer.c)
-target_link_libraries(ringbuffer_tests PRIVATE ringbuffer)
+add_executable(ringbuffer_tests ringbuffer/tests/reingbuffer_tests.c)
+target_link_libraries(ringbuffer_tests PRIVATE ca_ringbuffer ca_munit)
 add_test(NAME ringbuffer_test
          COMMAND ringbuffer_tests)
 
-#  #titree
-#  add_library(tritree_obj OBJECT tritree/src/tritree.c)
-#  add_library(tritree $<TARGET_OBJECTS:tritree_obj> )
-#  target_link_libraries(tritree PRIVATE ca_vector ca_string)
-#  install(TARGETS tritree)
-#  add_dependencies(tritree ca_vector)
+#titree
+add_library(tritree_obj OBJECT tritree/src/ca_tritree.c)
+add_library(ca_tritree $<TARGET_OBJECTS:tritree_obj> )
+target_link_libraries(ca_tritree PRIVATE ca_vector ca_string)
+install(TARGETS ca_tritree)
+add_dependencies(ca_tritree ca_vector)
 
-#  add_executable(tritree_tests tritree/tests/tritree_tests.c tritree/tests/munit.c)
-#  target_link_libraries(tritree_tests tritree)
-#  add_test(NAME tritree_test
-#           COMMAND tritree_tests)
+add_executable(tritree_tests tritree/tests/tritree_tests.c)
+target_link_libraries(tritree_tests ca_tritree ca_munit)
+add_test(NAME tritree_test
+         COMMAND tritree_tests)
 
-#  #bintree
-#  add_library(bintree_obj OBJECT bintree/src/bintree.c)
-#  add_library(bintree $<TARGET_OBJECTS:bintree_obj>)
-#  target_link_libraries(bintree PRIVATE ca_vector ca_string)
-#  install(TARGETS bintree)
-#  add_dependencies(bintree ca_vector)
+#bintree
+add_library(bintree_obj OBJECT bintree/src/ca_bintree.c)
+add_library(ca_bintree $<TARGET_OBJECTS:bintree_obj>)
+target_link_libraries(ca_bintree PRIVATE ca_vector ca_string)
+install(TARGETS ca_bintree)
+add_dependencies(ca_bintree ca_vector)
 
-#  add_executable(bintree_tests bintree/tests/bintree_tests.c bintree/tests/munit.c)
-#  target_link_libraries(bintree_tests PRIVATE bintree)
-#  add_test(NAME bintree_test
-#           COMMAND bintree_tests)
+add_executable(bintree_tests bintree/tests/bintree_tests.c)
+target_link_libraries(bintree_tests PRIVATE ca_bintree ca_munit)
+add_test(NAME bintree_test
+         COMMAND bintree_tests)
 
 #  #fileio
 #  add_library(fileio_obj OBJECT io/src/fileio.c)

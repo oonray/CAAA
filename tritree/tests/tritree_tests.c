@@ -1,9 +1,9 @@
-#include "bstrlib.h"
-#include "dbg.h"
-#include "munit.h"
-#include "tritree.h"
+#include <bstring/bstrlib.h>
+#include <ca_dbg.h>
+#include <ca_tritree.h>
+#include <munit/munit.h>
 
-TriTree *tree;
+ca_tritree *tree;
 
 static struct tagbstring value0 = bsStatic("ValueA");
 static struct tagbstring value1 = bsStatic("ValueB");
@@ -19,24 +19,24 @@ int trav = 0;
 
 static void *setup(const MunitParameter params[], void *fixture) {
 
-  tree = TriTree_Insert(tree, bdata(&key0), blength(&key0), &value0);
-  check(tree != NULL, "could not create TriTree");
+  tree = ca_tritree_insert(tree, bdata(&key0), blength(&key0), &value0);
+  check(tree != NULL, "could not create ca_tritree");
 
-  tree = TriTree_Insert(tree, bdata(&key1), blength(&key1), &value1);
-  check(tree != NULL, "could not create TriTree");
+  tree = ca_tritree_insert(tree, bdata(&key1), blength(&key1), &value1);
+  check(tree != NULL, "could not create ca_tritree");
 
-  tree = TriTree_Insert(tree, bdata(&key2), blength(&key2), &value2);
-  check(tree != NULL, "could not create TriTree");
+  tree = ca_tritree_insert(tree, bdata(&key2), blength(&key2), &value2);
+  check(tree != NULL, "could not create ca_tritree");
 
-  tree = TriTree_Insert(tree, bdata(&key3), blength(&key3), &value3);
-  check(tree != NULL, "could not create TriTree");
+  tree = ca_tritree_insert(tree, bdata(&key3), blength(&key3), &value3);
+  check(tree != NULL, "could not create ca_tritree");
 
   return tree;
 error:
   return NULL;
 }
 
-static void teardown(void *fixture) { TriTree_Destroy(tree); }
+static void teardown(void *fixture) { ca_tritree_destroy(tree); }
 
 void traverse(void *value, void *data) {
   assert(value != NULL);
@@ -54,16 +54,16 @@ error:
 MunitResult KeySearch(const MunitParameter params[], void *fixture) {
   check(tree != NULL, "Could not create tritree");
 
-  bstring out = (bstring)TriTree_Search(tree, bdata(&key0), blength(&key0));
+  bstring out = (bstring)ca_tritree_search(tree, bdata(&key0), blength(&key0));
   check(bstrcmp(out, &value0) == 0, "Wrong Value Recieved got %s", bdata(out));
 
-  out = (bstring)TriTree_Search(tree, bdata(&key1), blength(&key1));
+  out = (bstring)ca_tritree_search(tree, bdata(&key1), blength(&key1));
   check(bstrcmp(out, &value1) == 0, "Wrong Value Recieved");
 
-  out = (bstring)TriTree_Search(tree, bdata(&key2), blength(&key2));
+  out = (bstring)ca_tritree_search(tree, bdata(&key2), blength(&key2));
   check(bstrcmp(out, &value2) == 0, "Wrong Value Recieved");
 
-  out = (bstring)TriTree_Search(tree, bdata(&key3), blength(&key3));
+  out = (bstring)ca_tritree_search(tree, bdata(&key3), blength(&key3));
   check(bstrcmp(out, &value3) == 0, "Wrong Value Recieved");
   return MUNIT_OK;
 error:
@@ -75,18 +75,18 @@ MunitResult KeySearchPrefix(const MunitParameter params[], void *fixture) {
   check(tree != NULL, "Could not create tritree");
 
   bstring res =
-      (bstring)TriTree_Search_Prefix(tree, bdata(key0), blength(key0));
+      (bstring)ca_tritree_Search_Prefix(tree, bdata(key0), blength(key0));
   log_info("expected %s, got %s", bdata(value0), bdata((bstring)res));
   check(bstrcmp(res, &value0) == 0, "expected different value for 0");
 
-  res = (bstring)TriTree_Search_Prefix(tree, bdata(key3), 1);
+  res = (bstring)ca_tritree_Search_Prefix(tree, bdata(key3), 1);
   log_info("expected %s, got %s", bdata(value3), bdata((bstring)res));
   check(bstrcmp(res, &value3) == 0, "expected different value for 0");
 
-  res = (bstring)TriTree_Search_Prefix(tree, "TE", strlen("TE"));
+  res = (bstring)ca_tritree_Search_Prefix(tree, "TE", strlen("TE"));
   check(res != NULL, "expected parchial");
 
-  res = (bstring)TriTree_Search_Prefix(tree, "TE-", strlen("TE-"));
+  res = (bstring)ca_tritree_Search_Prefix(tree, "TE-", strlen("TE-"));
   check(res != NULL, "expected parchial");
 
   return MUNIT_OK;
@@ -99,7 +99,7 @@ MunitResult KeyTraverse(const MunitParameter params[], void *fixture) {
   check(tree != NULL, "Could not create tritree");
   trav = 0;
 
-  TriTree_Traverse(tree, traverse, NULL);
+  ca_tritree_traverse(tree, traverse, NULL);
   check(trav == 4, "did not find 4 keys");
 
   return MUNIT_OK;
@@ -115,7 +115,7 @@ MunitTest tests[] = {
     {"Key Traverse", KeyTraverse, setup, NULL, MUNIT_TEST_OPTION_NONE, NULL},
     {NULL, NULL, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL}};
 
-static const MunitSuite suite = {"TriTree keys ", tests, NULL, 1,
+static const MunitSuite suite = {"ca_tritree keys ", tests, NULL, 1,
                                  MUNIT_SUITE_OPTION_NONE};
 
 int main(int argc, char *argv[]) {

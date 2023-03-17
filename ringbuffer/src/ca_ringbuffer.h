@@ -1,56 +1,58 @@
-#ifndef __ringbuffer_h
-#define __ringbuffer_h
+#ifndef __ca_ringbuffer_h
+#define __ca_ringbuffer_h
 
-#include "bstrlib.h"
-#include "dbg.h"
+#include <bstring/bstrlib.h>
+#include <ca_dbg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-typedef struct {
+typedef struct ca_ringubffer {
   char *buffer; // Changed from Bstring
   // WARN: if errors check here
   int length;
   int start;
   int end;
-} RingBuffer;
+} ca_ringbuffer;
 
-RingBuffer *RingBuffer_New(int length);
-void RingBuffer_Destroy(RingBuffer *r);
+ca_ringbuffer *ca_ringbuffer_new(int length);
+void ca_ringbuffer_destroy(ca_ringbuffer *r);
 
-int RingBuffer_Read(RingBuffer *r, char *target, int amount);
-int RingBuffer_Write(RingBuffer *r, char *data, int amount);
+int ca_ringbuffer_read(ca_ringbuffer *r, char *target, int amount);
+int ca_ringbuffer_write(ca_ringbuffer *r, char *data, int amount);
 
-int RingBuffer_Empty(RingBuffer *r);
-int RingBuffer_Full(RingBuffer *r);
+int ca_ringbuffer_empty(ca_ringbuffer *r);
+int ca_ringbuffer_full(ca_ringbuffer *r);
 
-int RingBuffer_Avaliable_Data(RingBuffer *r);
-int RingBuffer_Avaliable_Space(RingBuffer *r);
+int ca_ringbuffer_avaliable_data(ca_ringbuffer *r);
+int ca_ringbuffer_avaliable_space(ca_ringbuffer *r);
 
-bstring RingBuffer_Gets(RingBuffer *r, int amount);
+bstring ca_ringbuffer_gets(ca_ringbuffer *r, int amount);
 
-#define RingBuffer_Avaliable_Data(B)                                           \
-  (((B)->end + 1) % (B)->length - (B)->start - 1)
+#define ca_ringbuffer_avaliable_data(b)                                        \
+  (((b)->end + 1) % (b)->length - (b)->start - 1)
 
-#define RingBuffer_Avaliable_Space(B) (B->length - (B)->end - 1)
+#define ca_ringbuffer_avaliable_space(b) (b->length - (b)->end - 1)
 
-#define RingBuffer_Full(B) (RingBuffer_Avaliable_Data((B)) - (B)->length == 0)
+#define ca_ringbuffer_full(b)                                                  \
+  (ca_ringbuffer_avaliable_data((b)) - (b)->length == 0)
 
-#define RingBuffer_Empty(B) (RingBuffer_Avaliable_Data((B)) == 0)
+#define ca_ringbuffer_empty(b) (ca_ringbuffer_avaliable_data((b)) == 0)
 
-#define RingBuffer_Puts(B, D) RingBuffer_Wite((B), bdata((D)), bstrlen((D)))
+#define ca_ringbuffer_puts(b, d)                                               \
+  ca_ringbuffer_wite((b), bdata((d)), bstrlen((d)))
 
-#define RingBuffer_Get_All(B)                                                  \
-  RingBuffer_Gets((B), RingBuffer_Avaliable_Data((B)))
+#define ca_ringbuffer_get_all(b)                                               \
+  ca_ringbuffer_gets((b), ca_ringbuffer_avaliable_data((b)))
 
-#define RingBuffer_Starts_At(B) ((B)->buffer + (B)->start)
+#define ca_ringbuffer_starts_at(b) ((b)->buffer + (b)->start)
 
-#define RingBuffer_Ends_At(B) ((B)->buffer + (B)->end)
+#define ca_ringbuffer_ends_at(b) ((b)->buffer + (b)->end)
 
-#define RingBuffer_Commit_Read(B, A)                                           \
-  ((B)->start = ((B)->start + (A)) % (B)->length)
+#define ca_ringbuffer_commit_read(b, a)                                        \
+  ((b)->start = ((b)->start + (a)) % (b)->length)
 
-#define RingBuffer_Commit_Write(B, A)                                          \
-  ((B)->end = ((B)->end + (A)) % (B)->length)
+#define ca_ringbuffer_commit_write(b, a)                                       \
+  ((b)->end = ((b)->end + (a)) % (b)->length)
 
 #endif
