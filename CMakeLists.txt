@@ -23,7 +23,7 @@ set(CPACK_PACKAGE_INSTALL_DIRECTORY ${CPACK_PACKAGE_NAME})
 #HFILES
 set(DEST "include/caaa")
 
-FILE(GLOB bstr_h strings/*.h)
+FILE(GLOB bstr_h inc/bstring/*.h)
 install(FILES ${bstr_h} DESTINATION ${DEST})
 
 FILE(GLOB dbg_h dbg/*.h)
@@ -39,7 +39,6 @@ include_directories("dbg/")
 include_directories("inc/")
 include_directories("strings/")
 
-
 #openssl
 find_package(OpenSSL)
 
@@ -51,17 +50,15 @@ add_library(ca_munit $<TARGET_OBJECTS:ca_munit_obj>)
 #bstrlib
 #@author websnarf
 #@git https://github.com/websnarf/bstrlib
-FILE(GLOB bstr_src strings/*.c)
+FILE(GLOB bstr_src inc/bstring/*.c)
 add_library(bstring_obj OBJECT ${bstr_src})
 add_library(ca_string $<TARGET_OBJECTS:bstring_obj>)
 install(TARGETS ca_string)
 
 
 # Vector
-
 add_library(vector_obj OBJECT vector/src/ca_vector.c)
 add_library(ca_vector $<TARGET_OBJECTS:vector_obj>)
-add_dependencies(ca_vector ca_string)
 install(TARGETS ca_vector)
 
 add_executable(vector_tests vector/tests/vector_tests.c)
@@ -105,19 +102,19 @@ target_link_libraries(queue_tests PRIVATE ca_queue ca_munit)
 add_test(NAME queue_test
          COMMAND queue_tests)
 
-#  #ringbuffer
-#  add_library(ringbuffer_obj OBJECT ringbuffer/src/ringbuffer.c)
-#  add_library(ringbuffer $<TARGET_OBJECTS:ringbuffer_obj>)
-#  target_link_libraries(ringbuffer PRIVATE ca_vector ca_string)
-#  install(TARGETS ringbuffer)
-#  add_dependencies(ringbuffer ca_vector)
-#  add_dependencies(ringbuffer ca_string)
+#ringbuffer
+add_library(ringbuffer_obj OBJECT ringbuffer/src/ringbuffer.c)
+add_library(ringbuffer $<TARGET_OBJECTS:ringbuffer_obj>)
+target_link_libraries(ringbuffer PRIVATE ca_vector ca_string)
+install(TARGETS ringbuffer)
+add_dependencies(ringbuffer ca_vector)
+add_dependencies(ringbuffer ca_string)
 
 
-#  add_executable(ringbuffer_tests ringbuffer/tests/reingbuffer_tests.c ringbuffer/tests/munit.c ringbuffer/src/ringbuffer.c)
-#  target_link_libraries(ringbuffer_tests PRIVATE ringbuffer)
-#  add_test(NAME ringbuffer_test
-#           COMMAND ringbuffer_tests)
+add_executable(ringbuffer_tests ringbuffer/tests/reingbuffer_tests.c ringbuffer/tests/munit.c ringbuffer/src/ringbuffer.c)
+target_link_libraries(ringbuffer_tests PRIVATE ringbuffer)
+add_test(NAME ringbuffer_test
+         COMMAND ringbuffer_tests)
 
 #  #titree
 #  add_library(tritree_obj OBJECT tritree/src/tritree.c)

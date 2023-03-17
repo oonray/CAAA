@@ -1,7 +1,7 @@
 #ifndef __ca_map_h
 #define __ca_map_h
 
-#include <bstrlib.h>
+#include <bstring/bstrlib.h>
 #include <ca_dbg.h>
 #include <ca_vector.h>
 #include <stdint.h>

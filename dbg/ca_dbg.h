@@ -1,12 +1,11 @@
 //
 // Created by alexa on 24/01/2021.
-//
 
 #ifndef _DBG_H
 #define _DBG_H
 
-#include "bstrlib.h"
 #include "colors.h"
+#include <bstring/bstrlib.h>
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
