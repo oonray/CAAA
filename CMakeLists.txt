@@ -152,14 +152,14 @@ target_link_libraries(io_tests PRIVATE ca_fileio ca_string ca_munit)
 add_test(NAME io_tests
          COMMAND io_tests)
 
-#  #io SSL
-#  add_library(fileio_ssl_obj OBJECT io/src/fileio.c)
-#  target_compile_definitions(fileio_ssl_obj PRIVATE _WITH_OPEN_SSL)
-#  add_library(fileio_ssl $<TARGET_OBJECTS:fileio_ssl_obj>)
-#  target_link_libraries(fileio_ssl PRIVATE ringbuffer ca_string OpenSSL::SSL)
+#io SSL
+add_library(fileio_ssl_obj OBJECT io/src/ca_fileio.c io/src/ca_fileio_ssl.c)
+target_compile_definitions(fileio_ssl_obj PRIVATE _CA_WITH_OPEN_SSL)
+add_library(ca_fileio_ssl $<TARGET_OBJECTS:fileio_ssl_obj>)
+target_link_libraries(ca_fileio_ssl PRIVATE ca_ringbuffer ca_string OpenSSL::SSL)
 
-#  install(TARGETS fileio_ssl)
-#  add_dependencies(fileio_ssl ringbuffer)
+install(TARGETS ca_fileio_ssl)
+add_dependencies(ca_fileio_ssl ca_ringbuffer)
 
 #  #argparse
 #  add_library(argparse_obj OBJECT argparse/src/bstrlib.c argparse/src/argparse.c)
