@@ -1,7 +1,7 @@
-#include "munit.h"
+#include <munit/munit.h>
 
-#ifndef _FILEIO_H
-#include "fileio.h"
+#ifndef _CA_FILEIO_H
+#include <ca_fileio.h>
 #endif
 
 struct tagbstring file = bsStatic("./file.out");
@@ -9,9 +9,9 @@ struct tagbstring content = bsStatic("loremipsumsetdoloramet");
 
 MunitResult test_new_file(const MunitParameter params[],
                           void *user_data_or_fixture) {
-  ioStream *stream = NewIoStreamFile(&file, O_RDWR | 0666, 1024 * 10);
+  ca_io_stream *stream = ca_io_stream_new_file(&file, O_RDWR | 0666, 1024 * 10);
   check(stream != NULL, "Could not create Stream %s", bdata(&file));
-  DestroyIoStream(stream);
+  ca_io_stream_destroy(stream);
   return MUNIT_OK;
 error:
   return MUNIT_FAIL;
@@ -19,9 +19,10 @@ error:
 
 MunitResult test_new_socket(const MunitParameter params[],
                             void *user_data_or_fixture) {
-  ioStream *stream = NewIoStreamSocket(AF_INET, SOCK_STREAM, SOCKFD, 1024 * 10);
+  ca_io_stream *stream =
+      ca_io_stream_new_socket(AF_INET, SOCK_STREAM, 1024 * 10);
   check(stream != NULL, "Could not create Stream");
-  DestroyIoStream(stream);
+  ca_io_stream_destroy(stream);
   return MUNIT_OK;
 error:
   return MUNIT_FAIL;
@@ -29,9 +30,9 @@ error:
 
 MunitResult test_new_std(const MunitParameter params[],
                          void *user_data_or_fixture) {
-  ioStream *stream = NewIoStream(ERR, FILEFD, 1024 * 10);
+  ca_io_stream *stream = ca_io_stream_new(CA_ERR, CA_FILEFD, 1024 * 10);
   check(stream != NULL, "Could not create Stream stderr");
-  DestroyIoStream(stream);
+  ca_io_stream_destroy(stream);
   return MUNIT_OK;
 error:
   return MUNIT_FAIL;
@@ -39,24 +40,24 @@ error:
 
 MunitResult test_file_read_write(const MunitParameter params[],
                                  void *user_data_or_fixture) {
-  ioStream *stream = NewIoStreamFile(&file, O_RDWR, 1024 * 10);
+  ca_io_stream *stream = ca_io_stream_new_file(&file, O_RDWR, 1024 * 10);
   check(stream != NULL, "Could not create Stream %s", bdata(&file));
 
-  int rc = IoStreamBuffWrite(stream, &content);
+  int rc = ca_io_stream_buff_write(stream, &content);
   check(rc > 0, "Could not write to buffer");
 
   rc = 0;
-  rc = IoStreamIoWrite(stream);
+  rc = ca_io_stream_io_write(stream);
   check(rc > 0, "Could not write to io");
-  DestroyIoStream(stream);
+  ca_io_stream_destroy(stream);
 
-  stream = NewIoStreamFile(&file, O_RDWR, 1024 * 10);
+  stream = ca_io_stream_new_file(&file, O_RDWR, 1024 * 10);
   check(stream != NULL, "Could not open file %s", bdata(&file));
 
-  rc = IoStreamIoRead(stream);
+  rc = ca_io_stream_io_read(stream);
   check(rc > 0, "Could not read from io");
 
-  bstring data = IoStreamBuffRead(stream);
+  bstring data = ca_io_stream_buff_read(stream);
   check(bstrcmp(data, &content), "Data in file not correct");
 
   return MUNIT_OK;

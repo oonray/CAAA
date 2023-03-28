@@ -139,18 +139,18 @@ target_link_libraries(bintree_tests PRIVATE ca_bintree ca_munit)
 add_test(NAME bintree_test
          COMMAND bintree_tests)
 
-#  #fileio
-#  add_library(fileio_obj OBJECT io/src/fileio.c)
-#  add_library(fileio $<TARGET_OBJECTS:fileio_obj>)
-#  target_link_libraries(fileio PRIVATE ca_string ringbuffer)
+#fileio
+add_library(fileio_obj OBJECT io/src/ca_fileio.c)
+add_library(ca_fileio $<TARGET_OBJECTS:fileio_obj>)
+target_link_libraries(ca_fileio PRIVATE ca_string ca_ringbuffer ca_vector)
 
-#  install(TARGETS fileio)
-#  add_dependencies(fileio ringbuffer)
+install(TARGETS ca_fileio)
+add_dependencies(ca_fileio ca_ringbuffer)
 
-#  add_executable(io_tests io/tests/fileio_test.c io/tests/munit.c)
-#  target_link_libraries(io_tests PRIVATE fileio)
-#  add_test(NAME io_tests
-#           COMMAND io_tests)
+add_executable(io_tests io/tests/fileio_test.c)
+target_link_libraries(io_tests PRIVATE ca_fileio ca_string ca_munit)
+add_test(NAME io_tests
+         COMMAND io_tests)
 
 #  #io SSL
 #  add_library(fileio_ssl_obj OBJECT io/src/fileio.c)
