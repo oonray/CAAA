@@ -39,8 +39,6 @@ include_directories("dbg/")
 include_directories("inc/")
 include_directories("strings/")
 
-#openssl
-find_package(OpenSSL)
 
 #munit
 FILE(GLOB munit inc/munit/*.c)
@@ -153,26 +151,33 @@ add_test(NAME io_tests
          COMMAND io_tests)
 
 #io SSL
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+   set(OSX TRUE)
+   set(OPENSSL_ROOT_DIR "/opt/homebrew/opt/openssl@1.1")
+endif()
+
+#openssl
+find_package(OpenSSL)
+if(${OPENSSL_FOUND})
+message("openssl: ${OPENSSL_FOUND}")
+message("openssl-include: ${OPENSSL_INCLUDE_DIR}")
+
 add_library(fileio_ssl_obj OBJECT io/src/ca_fileio.c io/src/ca_fileio_ssl.c)
+target_include_directories(fileio_ssl_obj PRIVATE ${OPENSSL_INCLUDE_DIR})
 target_compile_definitions(fileio_ssl_obj PRIVATE _CA_WITH_OPEN_SSL)
+
 add_library(ca_fileio_ssl $<TARGET_OBJECTS:fileio_ssl_obj>)
 target_link_libraries(ca_fileio_ssl PRIVATE ca_ringbuffer ca_string OpenSSL::SSL)
 
+
 install(TARGETS ca_fileio_ssl)
 add_dependencies(ca_fileio_ssl ca_ringbuffer)
+endif()
 
-#  #argparse
-#  add_library(argparse_obj OBJECT argparse/src/bstrlib.c argparse/src/argparse.c)
-#  add_library(argparse  $<TARGET_OBJECTS:argparse_obj>)
-#  target_link_libraries(argparse PRIVATE tritree ca_string ca_vector)
-#  install(TARGETS argparse)
-#  add_dependencies(argparse ca_vector)
-#  add_dependencies(argparse tritree)
-
-#  add_executable(argparse_tests argparse/tests/argparse_tests.c argparse/tests/munit.c)
-#  target_link_libraries(argparse_tests PRIVATE argparse)
-#  add_test(NAME argparse_test
-#           COMMAND argparse_tests)
+add_executable(argparse_tests argparse/tests/argparse_tests.c argparse/tests/munit.c)
+target_link_libraries(argparse_tests PRIVATE argparse)
+add_test(NAME argparse_test
+           COMMAND argparse_tests)
 
 #  #sockets
 #  add_library(soc_obj OBJECT sockets/src/soc.c)

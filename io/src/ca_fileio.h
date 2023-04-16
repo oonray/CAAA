@@ -1,7 +1,9 @@
 #include <arpa/inet.h>
 #include <fcntl.h>
 #include <netdb.h>
+#ifdef CA_FILEIO_SSL_H_
 #include <openssl/ssl.h>
+#endif
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
