@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-
+ 
 project(CAAA VERSION 1.0)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -174,97 +174,25 @@ install(TARGETS ca_fileio_ssl)
 add_dependencies(ca_fileio_ssl ca_ringbuffer)
 endif()
 
-add_executable(argparse_tests argparse/tests/argparse_tests.c argparse/tests/munit.c)
-target_link_libraries(argparse_tests PRIVATE argparse)
-add_test(NAME argparse_test
-           COMMAND argparse_tests)
+##argparse
+#use optargs
+# man 3 optargs
 
-#  #sockets
-#  add_library(soc_obj OBJECT sockets/src/soc.c)
-#  add_library(soc $<TARGET_OBJECTS:soc_obj>)
-#  target_link_libraries(soc PRIVATE fileio_ssl)
-#  install(TARGETS soc)
-#  add_dependencies(soc fileio)
-#  add_dependencies(soc ringbuffer)
+#sockets
+#add_library(soc_obj OBJECT sockets/src/soc.c)
+#add_library(soc $<TARGET_OBJECTS:soc_obj>)
+#target_link_libraries(soc PRIVATE fileio_ssl)
+#install(TARGETS soc)
+#add_dependencies(soc fileio)
+#add_dependencies(soc ringbuffer)
 
-#  add_executable(soc_tests sockets/tests/socket_tests.c sockets/tests/munit.c)
-#  target_link_libraries(soc_tests PRIVATE soc fileio_ssl ca_string)
-#  add_test(NAME soc_tests
-#           COMMAND soc_tests)
+#add_executable(soc_tests sockets/tests/socket_tests.c sockets/tests/munit.c)
+#target_link_libraries(soc_tests PRIVATE soc fileio_ssl ca_string)
+#add_test(NAME soc_tests
+#         COMMAND soc_tests)
 
 #  #request
-#  add_library(req_obj OBJECT webserver/src/request.c)
-#  add_library(req $<TARGET_OBJECTS:req_obj>)
-#  target_link_libraries(req PRIVATE fileio map)
-#  install(TARGETS req)
-#  add_dependencies(req fileio)
-#  add_dependencies(req soc)
-#  add_dependencies(req tritree)
-
-#  add_executable(req_tests webserver/tests/request_tests.c sockets/tests/munit.c)
-#  target_link_libraries(req_tests PRIVATE req)
-#  add_test(NAME req_tests
-#           COMMAND req_tests)
-#  #ssl
-#  add_library(soc_ssl_obj OBJECT sockets/src/ssl.c)
-#  add_library(soc_ssl $<TARGET_OBJECTS:soc_ssl_obj>)
-#  target_link_libraries(soc_ssl PRIVATE soc fileio_ssl toml)
-#  install(TARGETS soc_ssl)
-
-#  add_dependencies(soc fileio)
-#  add_dependencies(soc ringbuffer)
-#  add_dependencies(soc_ssl fileio)
-
-#  add_executable(soc_ssl_tests sockets/tests/ssl_tests.c sockets/tests/munit.c)
-#  target_link_libraries(soc_ssl_tests PRIVATE soc_ssl pthread)
-
-#  #add_test(NAME soc_ssl_tests
-#  #       COMMAND soc_ssl_tests)
+# use libcurl
 
 #  #web
-#  add_library(web_obj OBJECT webserver/src/webserver.c webserver/src/request.c)
-#  add_library(web $<TARGET_OBJECTS:web_obj>)
-#  target_link_libraries(web PRIVATE pthread fileio_ssl soc_ssl req tritree)
-
-#  install(TARGETS web)
-#  add_dependencies(web fileio)
-#  add_dependencies(web soc)
-#  add_dependencies(web tritree)
-
-#  add_executable(web_tests webserver/tests/webserver_test.c webserver/tests/munit.c)
-#  target_link_libraries(web_tests PRIVATE web)
-#  add_test(NAME web_tests
-#           COMMAND web_tests)
-
-#  #genssl
-#  add_library(genssl_obj OBJECT genssl/src/genssl.c)
-
-#  add_library(genssl $<TARGET_OBJECTS:genssl_obj>)
-#  target_link_libraries(genssl PRIVATE fileio_ssl soc_ssl)
-
-#  install(TARGETS genssl)
-#  add_dependencies(genssl fileio_ssl)
-#  add_dependencies(genssl soc_ssl)
-
-#  add_executable(genssl_tests genssl/test/genssl_tests.c genssl/test/munit.c)
-#  target_link_libraries(genssl_tests PRIVATE genssl)
-#  add_test(NAME genssl_tests
-#           COMMAND genssl_tests)
-
-#  #crypto
-#  ## XOR
-#  add_library(crypto_xor_obj OBJECT crypto/xor/xor.c)
-
-#  add_library(xor $<TARGET_OBJECTS:crypto_xor_obj>)
-#  target_link_libraries(xor PRIVATE fileio)
-
-#  install(TARGETS xor)
-#  add_dependencies(xor fileio)
-
-#  #tests
-#  add_executable(crypto_tests crypto/tests/crypto_tests.c crypto/tests/munit.c)
-#  target_include_directories(crypto_tests PRIVATE "crypto/xor")
-#  target_link_libraries(crypto_tests PRIVATE xor)
-
-#  add_test(NAME crypto_tests
-#           COMMAND crypto_tests)
+#  use mongoose.h
