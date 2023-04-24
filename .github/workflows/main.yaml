@@ -2,8 +2,8 @@ name: build CAAA deb
 
 on:
   push:
-    branches:
-      - "master"
+    tags:
+      - "v*"
 jobs:
   deb:
     runs-on: ubuntu-latest
