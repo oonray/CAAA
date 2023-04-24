@@ -44,6 +44,7 @@ include_directories("strings/")
 FILE(GLOB munit inc/munit/*.c)
 add_library(ca_munit_obj OBJECT inc/munit/munit.c)
 add_library(ca_munit $<TARGET_OBJECTS:ca_munit_obj>)
+install(TARGETS ca_munit)
 
 #bstrlib
 #@author websnarf
