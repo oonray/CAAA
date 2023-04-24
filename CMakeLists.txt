@@ -21,10 +21,10 @@ set(CPACK_PACKAGE_INSTALL_DIRECTORY ${CPACK_PACKAGE_NAME})
 
 
 #HFILES
-set(DEST "include/caaa")
+set(DEST "include")
 
 FILE(GLOB bstr_h inc/bstring/*.h)
-install(FILES ${bstr_h} DESTINATION ${DEST})
+install(FILES ${bstr_h} DESTINATION ${DEST}/bstring)
 
 FILE(GLOB dbg_h dbg/*.h)
 install(FILES ${dbg_h} DESTINATION ${DEST})
