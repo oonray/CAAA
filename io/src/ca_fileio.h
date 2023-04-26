@@ -25,6 +25,7 @@
 #define CA_SOCKFD 0x01
 #define CA_FILEFD 0x03
 #define CA_STRINGFD 0x05
+#define CA_PIPEFD 0x09
 #define CA_SSLFD 0x11
 #define CA_CREATE_RW O_RDWR | O_CREAT
 
@@ -52,21 +53,36 @@ typedef struct ca_io_stream {
 #endif
 } ca_io_stream;
 
+typedef struct ca_io_stream_pipe {
+  int f[2];
+  ca_io_stream *in;
+  ca_io_stream *out;
+} ca_io_stream_pipe;
+
 ca_io_stream *ca_io_stream_new(int fd, int fd_t, size_t buf_t);
 ca_io_stream *ca_io_stream_new_file(bstring path, int flags, int buf_t);
 ca_io_stream *ca_io_stream_new_socket(int inet, int type, int buf_t);
+ca_io_stream_pipe *ca_io_stream_new_pipe(size_t buff_t);
 
 ca_io_stream *ca_io_stream_new_from_file(FILE *fp, int buf_t);
 ca_io_stream *ca_io_stream_new_from_soc(int inet, int type, int buf_t,
                                         void *ssl);
 
 void ca_io_stream_destroy(ca_io_stream *io);
+void ca_io_stream_destroy_pipe(ca_io_stream_pipe *io);
 
 int ca_io_stream_io_read(ca_io_stream *str);
 int ca_io_stream_io_write(ca_io_stream *str);
+int ca_io_stream_io_read_pipe(ca_io_stream_pipe *str, int io);
+int ca_io_stream_io_write_pipe(ca_io_stream_pipe *str, int io);
 
 bstring ca_io_stream_buff_read(ca_io_stream *str);
 int ca_io_stream_buff_write(ca_io_stream *str, bstring input);
+
+bstring ca_io_stream_buff_read_pipe(ca_io_stream_pipe *str, int io);
+int ca_io_stream_buff_write_pipe(ca_io_stream_pipe *str, int io, bstring imput);
+
+int ca_io_stream_pipe_close(ca_io_stream_pipe *str, int io);
 
 // File Operations
 int ca_io_stream_file(bstring file);
