@@ -349,7 +349,7 @@ int ca_io_stream_pipe_open(ca_io_stream_pipe *str, int io) {
     return fcntl(str->in->fd, F_GETFD);
     break;
   case CA_OUT:
-    return fcntl(str->in->out, F_GETFD);
+    return fcntl(str->out->fd, F_GETFD);
     break;
   default:
     goto error;
