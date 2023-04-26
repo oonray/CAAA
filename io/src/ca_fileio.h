@@ -83,6 +83,7 @@ bstring ca_io_stream_buff_read_pipe(ca_io_stream_pipe *str, int io);
 int ca_io_stream_buff_write_pipe(ca_io_stream_pipe *str, int io, bstring imput);
 
 int ca_io_stream_pipe_close(ca_io_stream_pipe *str, int io);
+int ca_io_stream_pipe_open(ca_io_stream_pipe *str, int io);
 
 // File Operations
 int ca_io_stream_file(bstring file);

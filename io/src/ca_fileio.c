@@ -86,7 +86,7 @@ int ca_io_stream_io_read(ca_io_stream *str) {
     str->in->start = str->in->end = 0;
   }
 
-  switch(str->fd_t){
+  switch (str->fd_t) {
   case CA_SOCKFD: {
     ca_sock_reader r = (ca_sock_reader)str->reader;
     rc = r(str->fd, ca_ringbuffer_starts_at(str->in),
@@ -104,12 +104,12 @@ int ca_io_stream_io_read(ca_io_stream *str) {
   }
 #endif
 
-    default: {
+  default: {
     io_file_reader r = (io_file_reader)str->reader;
     rc = r(str->fd, ca_ringbuffer_starts_at(str->in),
            ca_ringbuffer_avaliable_space(str->in));
     break;
-    }
+  }
   }
 
   check(rc != 0, "Failed to read form %s",
@@ -126,29 +126,29 @@ error:
 int ca_io_stream_io_write(ca_io_stream *str) {
   int rc = 0;
 
-  switch(str->fd_t){
-    case CA_SOCKFD: {
+  switch (str->fd_t) {
+  case CA_SOCKFD: {
     ca_sock_writer w = (ca_sock_writer)str->writer;
     rc = w(str->fd, ca_ringbuffer_starts_at(str->in),
            ca_ringbuffer_avaliable_data(str->in), 0);
     break;
-    }
+  }
 #ifdef CA_FILEIO_SSL_H_
-    case CA_SSLFD: {
+  case CA_SSLFD: {
     check(str->ssl != NULL, "SSL is null at write");
     ca_sock_writer_ssl w = (ca_sock_writer_ssl)str->writer;
     rc = w(str->ssl, ca_ringbuffer_Starts_At(str->in),
            ca_ringbuffer_Avaliable_Data(str->in));
-  break;
+    break;
   }
 #endif
 
-    default: {
+  default: {
     io_file_writer w = (io_file_writer)str->writer;
     rc = w(str->fd, ca_ringbuffer_starts_at(str->in),
            ca_ringbuffer_avaliable_data(str->in));
     break;
-    }
+  }
   }
 
   ca_ringbuffer_commit_read(str->in, rc);
@@ -334,11 +334,26 @@ int ca_io_stream_pipe_close(ca_io_stream_pipe *str, int io) {
     log_error("only in and out supported");
     goto error;
   }
-  
+
   rc = fcntl(str->in->fd, F_GETFD);
-  check(rc!=-1,"allreaddy closed");
+  check(rc != -1, "allreaddy closed");
   close(data->fd);
   return 0;
+error:
+  return -1;
+}
+
+int ca_io_stream_pipe_open(ca_io_stream_pipe *str, int io) {
+  switch (io) {
+  case CA_INN:
+    return fcntl(str->in->fd, F_GETFD);
+    break;
+  case CA_OUT:
+    return fcntl(str->in->out, F_GETFD);
+    break;
+  default:
+    goto error;
+  }
 error:
   return -1;
 }
