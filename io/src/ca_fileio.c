@@ -336,8 +336,8 @@ int ca_io_stream_pipe_close(ca_io_stream_pipe *str, int io) {
   }
 
   rc = fcntl(str->in->fd, F_GETFD);
-  check(rc != -1, "allreaddy closed");
-  close(data->fd);
+  if (rc != -1)
+    close(data->fd);
   return 0;
 error:
   return -1;
