@@ -26,6 +26,9 @@ set(DEST "include")
 FILE(GLOB bstr_h inc/bstring/*.h)
 install(FILES ${bstr_h} DESTINATION ${DEST}/bstring)
 
+FILE(GLOB munit_h inc/munit/*.h)
+install(FILES ${munit_h} DESTINATION ${DEST}/munit)
+
 FILE(GLOB dbg_h dbg/*.h)
 install(FILES ${dbg_h} DESTINATION ${DEST})
 
