@@ -76,6 +76,8 @@ ca_io_stream_pipe *ca_io_stream_new_pipe(size_t buff_t);
 ca_io_stream *ca_io_stream_new_from_file(FILE *fp, int buf_t);
 ca_io_stream *ca_io_stream_new_from_soc(int inet, int type, int buf_t,
                                         void *ssl);
+ca_io_stream *ca_io_stream_new_serial(bstring path, int baud, int buf_t,
+                                      int vtime, int vmin);
 
 void ca_io_stream_destroy(ca_io_stream *io);
 void ca_io_stream_destroy_pipe(ca_io_stream_pipe *io);
