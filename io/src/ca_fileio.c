@@ -87,7 +87,7 @@ ca_io_stream *ca_io_stream_new_serial(bstring path, int baud, int buf_t,
   cfsetospeed(stream->tty, baud == 0 ? CA_B_DFAULT : baud);
 
   stream->tty->c_cc[VTIME] = vtime == 0 ? 10 : vtime;
-  stream->tty->c_cc[VMIN] = vmin == 0 ? 10 : vmin;
+  stream->tty->c_cc[VMIN] = vmin == 0 ? 0 : vmin;
   stream->tty->c_cflag &= DEFBIT;
 
   check(tcsetattr(stream->fd, TCSANOW, stream->tty) == 0,
