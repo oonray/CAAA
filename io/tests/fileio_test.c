@@ -121,6 +121,26 @@ error:
   return MUNIT_FAIL;
 }
 
+MunitResult test_serial_read_write(const MunitParameter params[],
+                                   void *user_data_or_fixture) {
+
+  ca_io_stream *p = ca_io_stream_new_serial(bfromcstr("/dev/cu.usbmodem111201"),
+                                            115200, 0, 0, 0);
+
+  ca_io_stream_buff_write(p, bfromcstr("AT\n\r"));
+  ca_io_stream_io_write(p);
+
+  ca_io_stream_io_read(p);
+  bstring res = ca_io_stream_buff_read(p);
+
+  log_info("%s", bdata(res));
+
+  ca_io_stream_destroy(p);
+  return MUNIT_OK;
+error:
+  return MUNIT_FAIL;
+}
+
 int main(int argc, char *argv[]) {
   MunitTest tests[] = {
       {" test_new_file", test_new_file, NULL, NULL, MUNIT_TEST_OPTION_NONE,
@@ -134,6 +154,8 @@ int main(int argc, char *argv[]) {
        NULL},
       {" test_pipe_read_write", test_pipe_read_write, NULL, NULL,
        MUNIT_TEST_OPTION_NONE, NULL},
+      //{" test_serial_read_write", test_serial_read_write, NULL, NULL,
+      // MUNIT_TEST_OPTION_NONE, NULL},
       {NULL, NULL, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL}};
 
   const MunitSuite suite = {"IO Tests", tests, NULL, 1,

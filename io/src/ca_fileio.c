@@ -89,9 +89,22 @@ ca_io_stream *ca_io_stream_new_serial(bstring path, int baud, int buf_t,
   stream->tty->c_cc[VTIME] = vtime == 0 ? 10 : vtime;
   stream->tty->c_cc[VMIN] = vmin == 0 ? 0 : vmin;
 
-  stream->tty->c_cflag = (stream->tty->c_cflag & ~CSIZE) | CS8; // 8-bit chars
+  stream->tty->c_lflag &= ~ICANON;
+  stream->tty->c_lflag &= ~ECHO;   // Disable echo
+  stream->tty->c_lflag &= ~ECHOE;  // Disable erasure
+  stream->tty->c_lflag &= ~ECHONL; // Disable new-line echo
+  stream->tty->c_lflag &=
+      ~ISIG; // Disable interpretation of INTR, QUIT and SUSP
+
+  stream->tty->c_iflag &= ~(IXON | IXOFF | IXANY);
+  stream->tty->c_iflag &=
+      ~(IGNBRK | BRKINT | PARMRK | ISTRIP | INLCR | IGNCR | ICRNL);
   stream->tty->c_iflag &= ~IGNBRK; // disable break processing
-  stream->tty->c_lflag = 0;        // no signaling chars, no echo,
+
+  stream->tty->c_oflag &= ~OPOST; // Prevent special interpretation of output
+  stream->tty->c_oflag &= ~ONLCR;
+
+  stream->tty->c_oflag = 0; // no remapping, no delays
   check(tcsetattr(stream->fd, TCSANOW, stream->tty) == 0,
         "Could not save tty config");
 
