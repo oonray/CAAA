@@ -28,8 +28,6 @@ ca_io_stream *ca_io_stream_new(int fd, int fd_t, size_t buf_t) {
   case CA_SERIAL:
     out->tty = calloc(1, sizeof(struct termios));
     check(out->tty != NULL, "Could not allocate tty");
-    check(tcgetattr(out->fd, out->tty) == 0,
-          "could not add serial interface to file desciptor");
   default:
     out->reader = &read;
     out->writer = &write;
