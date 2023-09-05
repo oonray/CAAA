@@ -17,18 +17,25 @@
 #include <bstring/bstrlib.h>
 #include <ca_dbg.h>
 #include <ca_ringbuffer.h>
+#include <ca_serial.h>
 #include <ca_vector.h>
+
+// Serial term
+#include <termios.h>
 
 #ifndef _CA_FILEIO_H
 #define _CA_FILEIO_H
 
-#define CA_SOCKFD 0x01
-#define CA_FILEFD 0x03
-#define CA_STRINGFD 0x05
-#define CA_PIPEFD 0x09
-#define CA_SSLFD 0x11
-#define CA_CREATE_RW O_RDWR | O_CREAT
+enum ca_socktypes {
+  CA_SOCKFD = 0x01,
+  CA_FILEFD = 0x03,
+  CA_STRINGFD = 0x05,
+  CA_PIPEFD = 0x09,
+  CA_SSLFD = 0x11,
+  CA_SERIAL = 0x13,
+};
 
+#define CA_CREATE_RW O_RDWR | O_CREAT
 enum ca_descriptors { CA_INN, CA_OUT, CA_ERR };
 
 static struct tagbstring ca_NL = bsStatic("\n");
@@ -51,6 +58,8 @@ typedef struct ca_io_stream {
 #ifdef CA_FILEIO_SSL_H_
   SSL *ssl;
 #endif
+  // serial uses tty
+  struct termios *tty;
 } ca_io_stream;
 
 typedef struct ca_io_stream_pipe {

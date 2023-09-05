@@ -1,3 +1,4 @@
+#include "ca_serial.h"
 #include <bstring/bstrlib.h>
 #include <ca_fileio.h>
 #include <stddef.h>
@@ -24,6 +25,11 @@ ca_io_stream *ca_io_stream_new(int fd, int fd_t, size_t buf_t) {
     out->writer = &SSL_write;
     break;
 #endif
+  case CA_SERIAL:
+    out->tty = calloc(1, sizeof(struct termios));
+    check(out->tty != NULL, "Could not allocate tty");
+    check(tcgetattr(out->fd, out->tty) == 0,
+          "could not add serial interface to file desciptor");
   default:
     out->reader = &read;
     out->writer = &write;
@@ -68,6 +74,28 @@ ca_io_stream *ca_io_stream_new_socket(int inet, int type, int buf_t) {
   int s_fd = socket(inet, type, 0);
   check(s_fd != 0, "Could not open file");
   return ca_io_stream_new(s_fd, CA_SOCKFD, buf_t);
+error:
+  return NULL;
+}
+
+ca_io_stream *ca_io_stream_new_serial(bstring path, int baud, int buf_t,
+                                      int vtime, int vmin) {
+  int fd = open(bdata(path), O_RDWR);
+  ca_io_stream *stream = ca_io_stream_new(fd, CA_SERIAL, buf_t);
+  check(stream != NULL, "Could not create SERIAL Stream");
+
+  // set tty speed
+  cfsetispeed(stream->tty, baud == 0 ? CA_B_DFAULT : baud);
+  cfsetospeed(stream->tty, baud == 0 ? CA_B_DFAULT : baud);
+
+  stream->tty->c_cc[VTIME] = vtime == 0 ? 10 : vtime;
+  stream->tty->c_cc[VMIN] = vmin == 0 ? 10 : vmin;
+  stream->tty->c_cflag &= DEFBIT;
+
+  check(tcsetattr(stream->fd, TCSANOW, stream->tty) == 0,
+        "Could not save tty config");
+
+  return stream;
 error:
   return NULL;
 }

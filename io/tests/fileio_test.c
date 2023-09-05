@@ -5,6 +5,10 @@
 #include <ca_fileio.h>
 #endif
 
+#ifndef _CA_SERIAL_H_
+#include <ca_serial.h>
+#endif
+
 struct tagbstring file = bsStatic("./file.out");
 struct tagbstring content = bsStatic("loremipsumsetdoloramet");
 
