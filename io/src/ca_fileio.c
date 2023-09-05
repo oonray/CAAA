@@ -89,7 +89,7 @@ ca_io_stream *ca_io_stream_new_serial(bstring path, int baud, int buf_t,
   stream->tty->c_cc[VTIME] = vtime == 0 ? 10 : vtime;
   stream->tty->c_cc[VMIN] = vmin == 0 ? 0 : vmin;
 
-  stream->tty->c_cflag = (tty.c_cflag & ~CSIZE) | CS8; // 8-bit chars
+  stream->tty->c_cflag = (stream->tty->c_cflag & ~CSIZE) | CS8; // 8-bit chars
   stream->tty->c_iflag &= ~IGNBRK; // disable break processing
   stream->tty->c_lflag = 0;        // no signaling chars, no echo,
   check(tcsetattr(stream->fd, TCSANOW, stream->tty) == 0,
