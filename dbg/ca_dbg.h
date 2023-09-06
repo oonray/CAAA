@@ -24,11 +24,11 @@
           ##__VA_ARGS__);
 
 #define log_info(M, ...)                                                       \
-  { dbg_log(stdout, KNOK, KMAG, "INFO", "NULL", M, ##__VA_ARGS__); }
+  { dbg_log(OUT_STD, KNOK, KMAG, "INFO", "NULL", M, ##__VA_ARGS__); }
 
 #define log_error(M, ...)                                                      \
   {                                                                            \
-    dbg_log(stderr, KWAR, KRED, "ERROR", "errno | %d | %s", M, errno,          \
+    dbg_log(OUT_ERR, KWAR, KRED, "ERROR", "errno | %d | %s", M, errno,         \
             dbg_get_errno(), ##__VA_ARGS__);                                   \
   }
 
