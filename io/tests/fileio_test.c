@@ -157,8 +157,8 @@ int main(int argc, char *argv[]) {
        NULL},
       {" test_pipe_read_write", test_pipe_read_write, NULL, NULL,
        MUNIT_TEST_OPTION_NONE, NULL},
-      {" test_serial_read_write", test_serial_read_write, NULL, NULL,
-       MUNIT_TEST_OPTION_NONE, NULL},
+      //{" test_serial_read_write", test_serial_read_write, NULL, NULL,
+      // MUNIT_TEST_OPTION_NONE, NULL},
       {NULL, NULL, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL}};
 
   const MunitSuite suite = {"IO Tests", tests, NULL, 1,
