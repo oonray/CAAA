@@ -59,7 +59,6 @@ ca_io_stream *ca_io_stream_new_file(bstring path, int flags, int buf_t) {
 error:
   return NULL;
 }
-
 ca_io_stream *ca_io_stream_new_from_file(FILE *fp, int buf_t) {
   int fd = fileno(fp);
   ca_io_stream *stream = ca_io_stream_new(fd, CA_FILEFD, buf_t);
@@ -75,7 +74,6 @@ ca_io_stream *ca_io_stream_new_socket(int inet, int type, int buf_t) {
 error:
   return NULL;
 }
-
 ca_io_stream *ca_io_stream_new_serial(bstring path, int baud, int buf_t,
                                       int vtime, int vmin) {
   int fd = open(bdata(path), O_RDWR);
@@ -86,25 +84,19 @@ ca_io_stream *ca_io_stream_new_serial(bstring path, int baud, int buf_t,
   cfsetispeed(stream->tty, baud == 0 ? CA_B_DFAULT : baud);
   cfsetospeed(stream->tty, baud == 0 ? CA_B_DFAULT : baud);
 
-  stream->tty->c_cc[VTIME] = vtime == 0 ? 10 : vtime;
-  stream->tty->c_cc[VMIN] = vmin == 0 ? 0 : vmin;
-
-  stream->tty->c_lflag &= ~ICANON;
-  stream->tty->c_lflag &= ~ECHO;   // Disable echo
-  stream->tty->c_lflag &= ~ECHOE;  // Disable erasure
-  stream->tty->c_lflag &= ~ECHONL; // Disable new-line echo
-  stream->tty->c_lflag &=
-      ~ISIG; // Disable interpretation of INTR, QUIT and SUSP
-
-  stream->tty->c_iflag &= ~(IXON | IXOFF | IXANY);
-  stream->tty->c_iflag &=
-      ~(IGNBRK | BRKINT | PARMRK | ISTRIP | INLCR | IGNCR | ICRNL);
+  stream->tty->c_cflag = (stream->tty->c_cflag & ~CSIZE) | CS8; // 8-bit chars
   stream->tty->c_iflag &= ~IGNBRK; // disable break processing
+  stream->tty->c_lflag = 0;        // no signaling chars, no echo,
+  stream->tty->c_oflag = 0;        // no remapping, no delays
+  stream->tty->c_cc[VMIN] = vmin;  // read doesn't block
+  stream->tty->c_cc[VTIME] = 5;    // 0.5 seconds read timeout
+  stream->tty->c_iflag &= ~(IXON | IXOFF | IXANY); // shut off xon/xoff ctrl
+  stream->tty->c_cflag |= (CLOCAL | CREAD);        // ignore modem controls,
+  stream->tty->c_cflag &= ~(PARENB | PARODD);      // shut off parity
+  stream->tty->c_cflag |= 0;                       // parity
+  stream->tty->c_cflag &= ~CSTOPB;
+  stream->tty->c_cflag &= ~CRTSCTS;
 
-  stream->tty->c_oflag &= ~OPOST; // Prevent special interpretation of output
-  stream->tty->c_oflag &= ~ONLCR;
-
-  stream->tty->c_oflag = 0; // no remapping, no delays
   check(tcsetattr(stream->fd, TCSANOW, stream->tty) == 0,
         "Could not save tty config");
 
@@ -120,7 +112,6 @@ void ca_io_stream_destroy(ca_io_stream *io) {
     free(io);
   }
 }
-
 int ca_io_stream_io_read(ca_io_stream *str) {
   int rc = 0;
   if (ca_ringbuffer_avaliable_data(str->in) == 0) {
@@ -163,7 +154,6 @@ int ca_io_stream_io_read(ca_io_stream *str) {
 error:
   return 0;
 }
-
 int ca_io_stream_io_write(ca_io_stream *str) {
   int rc = 0;
 
@@ -210,18 +200,11 @@ bstring ca_io_stream_buff_read(ca_io_stream *str) {
 error:
   return NULL;
 }
-
 int ca_io_stream_buff_write(ca_io_stream *str, bstring input) {
-  if (ca_ringbuffer_avaliable_data(str->in) == 0) {
-    str->in->start = str->in->end = 0;
-  }
-
   int rc = ca_ringbuffer_write(str->in, bdata(input), blength(input));
 
   check(rc != 0, "Failed to read form %s",
         str->fd_t == CA_SOCKFD ? "Socket" : "File");
-
-  ca_ringbuffer_commit_write(str->in, rc);
 
   return rc;
 error:
@@ -236,7 +219,6 @@ int io_stream_file_exists(bstring file) {
 error:
   return -1;
 }
-
 int ca_io_stream_file_create(bstring file, mode_t mode) {
   int fd = open(bdata(file), mode);
   check(fd > 0, "File %s could not be created", bdata(file));
@@ -245,7 +227,6 @@ error:
   close(fd);
   return -1;
 }
-
 int ca_io_stream_directory_exists(bstring directory) {
   struct stat st;
   int rc = stat(bdata(directory), &st);
@@ -254,8 +235,7 @@ int ca_io_stream_directory_exists(bstring directory) {
 error:
   return -1;
 }
-
-int io_stream_directorycreate(bstring directory, mode_t mode) {
+int io_stream_directory_create(bstring directory, mode_t mode) {
   int fd = mkdir(bdata(directory), mode);
   check(fd >= 0, "Directory could not be created");
   close(fd);
@@ -263,6 +243,18 @@ int io_stream_directorycreate(bstring directory, mode_t mode) {
 error:
   close(fd);
   return -1;
+}
+
+void ca_io_stream_destroy_pipe(ca_io_stream_pipe *io) {
+  if (io->in) {
+    ca_io_stream_pipe_close(io, CA_INN);
+    ca_io_stream_destroy(io->in);
+  }
+  if (io->out) {
+    ca_io_stream_pipe_close(io, CA_OUT);
+    ca_io_stream_destroy(io->out);
+  }
+  free(io);
 }
 
 ca_io_stream_pipe *ca_io_stream_new_pipe(size_t buff_t) {
@@ -283,84 +275,6 @@ error:
     ca_io_stream_destroy_pipe(out);
   return NULL;
 }
-
-void ca_io_stream_destroy_pipe(ca_io_stream_pipe *io) {
-  if (io->in) {
-    ca_io_stream_pipe_close(io, CA_INN);
-    ca_io_stream_destroy(io->in);
-  }
-  if (io->out) {
-    ca_io_stream_pipe_close(io, CA_OUT);
-    ca_io_stream_destroy(io->out);
-  }
-  free(io);
-}
-
-int ca_io_stream_io_read_pipe(ca_io_stream_pipe *str, int io) {
-  switch (io) {
-  case CA_INN:
-    return ca_io_stream_io_read(str->in);
-    break;
-  case CA_OUT:
-    return ca_io_stream_io_read(str->out);
-    break;
-  default:
-    log_error("only in and out are allowed");
-    goto error;
-    break;
-  }
-error:
-  return 0;
-}
-
-int ca_io_stream_io_write_pipe(ca_io_stream_pipe *str, int io) {
-  switch (io) {
-  case CA_INN:
-    return ca_io_stream_io_write(str->in);
-    break;
-  case CA_OUT:
-    return ca_io_stream_io_write(str->out);
-    break;
-  default:
-    log_error("Only in and out are allowed");
-    goto error;
-    break;
-  }
-error:
-  return 0;
-}
-
-bstring ca_io_stream_buff_read_pipe(ca_io_stream_pipe *str, int io) {
-  switch (io) {
-  case CA_INN:
-    return ca_io_stream_buff_read(str->in);
-    break;
-  case CA_OUT:
-    return ca_io_stream_buff_read(str->out);
-    break;
-  default:
-    goto error;
-  }
-error:
-  return NULL;
-}
-
-int ca_io_stream_buff_write_pipe(ca_io_stream_pipe *str, int io,
-                                 bstring input) {
-  switch (io) {
-  case CA_INN:
-    return ca_io_stream_buff_write(str->in, input);
-    break;
-  case CA_OUT:
-    return ca_io_stream_buff_write(str->out, input);
-    break;
-  default:
-    goto error;
-  }
-error:
-  return -1;
-}
-
 int ca_io_stream_pipe_close(ca_io_stream_pipe *str, int io) {
   int rc;
   ca_io_stream *data;
@@ -383,7 +297,6 @@ int ca_io_stream_pipe_close(ca_io_stream_pipe *str, int io) {
 error:
   return -1;
 }
-
 int ca_io_stream_pipe_open(ca_io_stream_pipe *str, int io) {
   switch (io) {
   case CA_INN:
@@ -397,4 +310,67 @@ int ca_io_stream_pipe_open(ca_io_stream_pipe *str, int io) {
   }
 error:
   return -1;
+}
+
+bstring ca_io_stream_buff_read_pipe(ca_io_stream_pipe *str, int io) {
+  switch (io) {
+  case CA_INN:
+    return ca_io_stream_buff_read(str->in);
+    break;
+  case CA_OUT:
+    return ca_io_stream_buff_read(str->out);
+    break;
+  default:
+    goto error;
+  }
+error:
+  return NULL;
+}
+int ca_io_stream_buff_write_pipe(ca_io_stream_pipe *str, int io,
+                                 bstring input) {
+  switch (io) {
+  case CA_INN:
+    return ca_io_stream_buff_write(str->in, input);
+    break;
+  case CA_OUT:
+    return ca_io_stream_buff_write(str->out, input);
+    break;
+  default:
+    goto error;
+  }
+error:
+  return -1;
+}
+
+int ca_io_stream_io_read_pipe(ca_io_stream_pipe *str, int io) {
+  switch (io) {
+  case CA_INN:
+    return ca_io_stream_io_read(str->in);
+    break;
+  case CA_OUT:
+    return ca_io_stream_io_read(str->out);
+    break;
+  default:
+    log_error("only in and out are allowed");
+    goto error;
+    break;
+  }
+error:
+  return 0;
+}
+int ca_io_stream_io_write_pipe(ca_io_stream_pipe *str, int io) {
+  switch (io) {
+  case CA_INN:
+    return ca_io_stream_io_write(str->in);
+    break;
+  case CA_OUT:
+    return ca_io_stream_io_write(str->out);
+    break;
+  default:
+    log_error("Only in and out are allowed");
+    goto error;
+    break;
+  }
+error:
+  return 0;
 }

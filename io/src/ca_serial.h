@@ -4,9 +4,6 @@
 #include <ca_dbg.h>
 #include <ca_fileio.h>
 
-#define DEFBIT                                                                 \
-  ~PARENB & ~PARENB & ~CSTOPB | CREAD | CLOCAL & ~CSTOPB | CS8 & ~CRTSCTS
-
 enum ca_baud {
   CA_B_300 = 300,
   CA_B_1200 = 1200,

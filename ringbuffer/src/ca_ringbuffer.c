@@ -24,6 +24,7 @@ int ca_ringbuffer_write(ca_ringbuffer *r, char *data, int length) {
   check(length <= ca_ringbuffer_avaliable_space(r),
         "not enough space: %d request, %d avaliable",
         ca_ringbuffer_avaliable_data(r), length);
+
   void *result = memcpy(ca_ringbuffer_ends_at(r), data, length);
   check(result != NULL, "Failed To Write Data int buffer");
 
@@ -34,7 +35,7 @@ error:
   return -1;
 }
 
-int ca_ringbuffer_Read(ca_ringbuffer *r, char *target, int amount) {
+int ca_ringbuffer_read(ca_ringbuffer *r, char *target, int amount) {
   check(amount <= ca_ringbuffer_avaliable_data(r),
         "Not enough in the buffer: has %d, needs %d",
         ca_ringbuffer_avaliable_data(r), amount);
@@ -45,12 +46,34 @@ int ca_ringbuffer_Read(ca_ringbuffer *r, char *target, int amount) {
     r->start = r->end = 0;
   }
 
+  ca_ringbuffer_commit_read(r, amount);
   return amount;
 error:
   return -1;
 }
 
-bstring ca_ringbuffer_gets(ca_ringbuffer *r, int amount) {
+bstring ca_ringbuffer_read_all(ca_ringbuffer *r, int amount) {
+  check(amount > 0, "Need more than 0 for gets, you gave: %d", amount);
+  check(amount <= ca_ringbuffer_avaliable_data(r), "not enough in the buffer.");
+
+  char *data = calloc(amount, sizeof(char));
+  int rc = ca_ringbuffer_read(r, data, amount);
+  check(rc > 0, "failed to read form ringbuffer");
+  check(rc == amount, "failed to read form ringbuffer wrong lenght");
+  check(data != NULL, "Failed to reaad into data");
+
+  bstring result = bfromcstr(data);
+  check(result != NULL, "Failed to create result");
+  // check(blength(result) == amount, "Wrong length result %s:%s %d:%d:%d",
+  //     bdata(result), data, blength(result), (int)strlen(data), amount);
+
+  check(ca_ringbuffer_avaliable_data(r) >= 0, "error in read commit");
+
+  return result;
+error:
+  return NULL;
+}
+bstring ca_ringbuffer_get_bstring(ca_ringbuffer *r, int amount) {
   check(amount > 0, "Need more than 0 for gets, you gave: %d", amount);
   check(amount <= ca_ringbuffer_avaliable_data(r), "not enough in the buffer.");
 

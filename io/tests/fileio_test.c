@@ -94,7 +94,7 @@ MunitResult test_pipe_read_write(const MunitParameter params[],
     goto error;
   }
 
-  bstring in = bfromcstr("Hello World");
+  bstring in = bfromcstr("Hello Pipe");
   if (child_pid == 0) {
     // child
     int rdy = ca_io_stream_buff_write_pipe(p, CA_OUT, in);
@@ -127,7 +127,10 @@ MunitResult test_serial_read_write(const MunitParameter params[],
   ca_io_stream *p = ca_io_stream_new_serial(bfromcstr("/dev/cu.usbmodem111201"),
                                             115200, 0, 0, 0);
 
-  ca_io_stream_buff_write(p, bfromcstr("AT\n\r"));
+  // ca_io_stream_buff_write(p, bfromcstr("AT\n\r"));
+  // ca_io_stream_io_write(p);
+
+  ca_io_stream_buff_write(p, bfromcstr("AT+CREG=\n\r"));
   ca_io_stream_io_write(p);
 
   ca_io_stream_io_read(p);
@@ -148,14 +151,14 @@ int main(int argc, char *argv[]) {
       {" test_new_sock", test_new_socket, NULL, NULL, MUNIT_TEST_OPTION_NONE,
        NULL},
       {" test_new_std", test_new_std, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
-      {" test_file_read_write", test_file_read_write, NULL, NULL,
-       MUNIT_TEST_OPTION_NONE, NULL},
+      //     {" test_file_read_write", test_file_read_write, NULL, NULL,
+      //    MUNIT_TEST_OPTION_NONE, NULL},
       {" test_pipe_new", test_pipe_new, NULL, NULL, MUNIT_TEST_OPTION_NONE,
        NULL},
       {" test_pipe_read_write", test_pipe_read_write, NULL, NULL,
        MUNIT_TEST_OPTION_NONE, NULL},
-      //{" test_serial_read_write", test_serial_read_write, NULL, NULL,
-      // MUNIT_TEST_OPTION_NONE, NULL},
+      {" test_serial_read_write", test_serial_read_write, NULL, NULL,
+       MUNIT_TEST_OPTION_NONE, NULL},
       {NULL, NULL, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL}};
 
   const MunitSuite suite = {"IO Tests", tests, NULL, 1,

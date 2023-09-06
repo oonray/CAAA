@@ -25,7 +25,9 @@ MunitResult test_write(const MunitParameter params[],
   bstring data = cstr2bstr("hello world!");
 
   ca_ringbuffer_write(b, bdata(data), blength(data));
-  log_info("%s", ca_ringbuffer_starts_at(b));
+
+  bstring out = ca_ringbuffer_get_all(b);
+  log_info("%s", bdata(out));
 
   return MUNIT_OK;
 error:
@@ -35,6 +37,13 @@ error:
 MunitResult test_read(const MunitParameter params[],
                       void *user_data_or_fixture) {
   ca_ringbuffer *b = (ca_ringbuffer *)user_data_or_fixture;
+  bstring data = cstr2bstr("hello world!");
+
+  ca_ringbuffer_write(b, bdata(data), blength(data));
+
+  bstring out = ca_ringbuffer_get_all(b);
+  log_info("%s", bdata(out));
+
   return MUNIT_OK;
 error:
   return MUNIT_FAIL;
@@ -44,6 +53,8 @@ int main(int argc, char *const *argv) {
   MunitTest tests[] = {{" test_new", test_new, tests_setup, test_teardown,
                         MUNIT_TEST_OPTION_NONE, NULL},
                        {" test_write", test_write, tests_setup, test_teardown,
+                        MUNIT_TEST_OPTION_NONE, NULL},
+                       {" test_read", test_read, tests_setup, test_teardown,
                         MUNIT_TEST_OPTION_NONE, NULL},
                        {NULL, NULL, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL}};
 

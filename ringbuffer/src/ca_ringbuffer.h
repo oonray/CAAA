@@ -19,6 +19,8 @@ ca_ringbuffer *ca_ringbuffer_new(int length);
 void ca_ringbuffer_destroy(ca_ringbuffer *r);
 
 int ca_ringbuffer_read(ca_ringbuffer *r, char *target, int amount);
+bstring ca_ringbuffer_read_all(ca_ringbuffer *r, int amount);
+
 int ca_ringbuffer_write(ca_ringbuffer *r, char *data, int amount);
 
 int ca_ringbuffer_empty(ca_ringbuffer *r);
@@ -43,7 +45,10 @@ bstring ca_ringbuffer_gets(ca_ringbuffer *r, int amount);
   ca_ringbuffer_wite((b), bdata((d)), bstrlen((d)))
 
 #define ca_ringbuffer_get_all(b)                                               \
-  ca_ringbuffer_gets((b), ca_ringbuffer_avaliable_data((b)))
+  ca_ringbuffer_read_all((b), ca_ringbuffer_avaliable_data((b)))
+
+#define ca_ringbuffer_get_all_bstring(b)                                       \
+  ca_ringbuffer_get_bstring((b), ca_ringbuffer_avaliable_data((b)))
 
 #define ca_ringbuffer_starts_at(b) ((b)->buffer + (b)->start)
 
