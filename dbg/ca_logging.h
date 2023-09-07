@@ -7,7 +7,7 @@
 #define open_log(N, O, P) openlog(N, O, P)
 #define close_log() closelog()
 
-#define DBG_FORMAT(S, M, P) "[file: %s | func %s | line %d] [" P "] " M "\n"
+#define DBG_FORMAT(M, P) "[file: %s | func %s | line %d] [" P "] " M "\n"
 
 #define dbg_syslog(S, P, M, ...)                                               \
   syslog(S, DBG_FORMAT(M, P), __FILE__, __func__, __LINE__, ##__VA_ARGS__);
