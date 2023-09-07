@@ -4,7 +4,7 @@
 class Caaa < Formula
   desc "c with aaa batteres"
   homepage ""
-  url "https://github.com/oonray/CAAA/archive/refs/tags/v1.1.20.tar.gz"
+  url "https://github.com/oonray/CAAA/archive/refs/tags/v1.1.21.tar.gz"
   license "MIT"
 
   depends_on "cmake" => :build
